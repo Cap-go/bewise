@@ -9,13 +9,15 @@ await $`bunx capacitor-assets generate --iconBackgroundColor '#0b1016' --iconBac
 const set = 'ios/App/App/Assets.xcassets/AppIcon.appiconset'
 copyFileSync('assets/icon-ios-dark.png', `${set}/AppIcon-dark.png`)
 copyFileSync('assets/icon-ios-tinted.png', `${set}/AppIcon-tinted.png`)
-const image = (filename: string, appearance?: string) => ({
-  ...(appearance ? { appearances: [{ appearance: 'luminosity', value: appearance }] } : {}),
-  filename,
-  idiom: 'universal',
-  platform: 'ios',
-  size: '1024x1024',
-})
+function image(filename: string, appearance?: string) {
+  return {
+    ...(appearance ? { appearances: [{ appearance: 'luminosity', value: appearance }] } : {}),
+    filename,
+    idiom: 'universal',
+    platform: 'ios',
+    size: '1024x1024',
+  }
+}
 writeFileSync(`${set}/Contents.json`, `${JSON.stringify({
   images: [image('AppIcon-512@2x.png'), image('AppIcon-dark.png', 'dark'), image('AppIcon-tinted.png', 'tinted')],
   info: { author: 'xcode', version: 1 },
