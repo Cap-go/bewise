@@ -19,6 +19,11 @@ on:
         type: choice
         default: auto
         options: [auto, ota, native]
+      platform:
+        description: Native platform(s) to build when a native build runs
+        type: choice
+        default: both
+        options: [both, ios, android]
       submit_for_review:
         description: Submit native builds to App Store / Play review
         type: boolean
@@ -102,7 +107,7 @@ jobs:
       # One cloud build at a time keeps us inside the Capgo plan's concurrency.
       max-parallel: 1
       matrix:
-        platform: [ios, android]
+        platform: ${{ fromJSON(inputs.platform == 'ios' && '["ios"]' || inputs.platform == 'android' && '["android"]' || '["ios","android"]') }}
     steps:
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
