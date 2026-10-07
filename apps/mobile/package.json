@@ -9,7 +9,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "vue-tsc -b",
     "sync": "bun run build && cap sync",
-    "assets": "capacitor-assets generate --iconBackgroundColor '#00c0ff' --splashBackgroundColor '#0b1016' --splashBackgroundColorDark '#0b1016'"
+    "assets": "bun scripts/assets.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
