@@ -146,11 +146,18 @@ jobs:
           if [ "${{ matrix.platform }}" = "android" ] && [ "${{ vars.PLAY_STORE_READY }}" != "true" ]; then
             review="--no-playstore-upload --output-upload --output-retention 7d"
           fi
+          # "What's new" comes from store/metadata/<locale>.json (Play uses en-US/fr-FR).
+          notes=()
+          for f in ../../store/metadata/*.json; do
+            locale=$(basename "$f" .json)
+            [ "${{ matrix.platform }}" = "android" ] && [ "$locale" = "en-GB" ] && locale=en-US
+            notes+=(--store-release-notes-locale "$locale=$(jq -r .whatsNew "$f")")
+          done
           bunx @capgo/cli@latest build request "$APP_ID" --platform ${{ matrix.platform }} --path . \
             --node-modules ../../node_modules --skip-build-number-bump \
             --store-release-name "${{ needs.prepare.outputs.version }}" \
-            --store-release-notes "Fresh quote every morning, new design with native navigation, share as image and daily reminders." \
-            $review
+            --store-release-notes "$(jq -r .whatsNew ../../store/metadata/en-GB.json)" \
+            "${notes[@]}" $review
 
   # After a native release, put the same web build on the channel so the next
   # `build needed` check compares against the new native baseline.

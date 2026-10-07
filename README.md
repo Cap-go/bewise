@@ -47,6 +47,8 @@ Push to `main`:
 | `apps/api/**` | `wrangler deploy` + D1 migrations |
 | `apps/website/**` | `wrangler deploy` of the static site |
 
+Store listing text and screenshots live in `store/` (`bun store/app-store.ts <version>` pushes them to App Store Connect). "What's new" for each release comes from `store/metadata/*.json`.
+
 Required GitHub secrets: `CAPGO_TOKEN`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (org secrets), and for native builds `BUILD_CERTIFICATE_BASE64`, `P12_PASSWORD`, `CAPGO_IOS_PROVISIONING_MAP`, `APPLE_KEY_ID`, `APPLE_ISSUER_ID`, `APPLE_KEY_CONTENT`, `APP_STORE_CONNECT_TEAM_ID`, `ANDROID_KEYSTORE_FILE`, `KEYSTORE_KEY_ALIAS`, `KEYSTORE_KEY_PASSWORD`, `KEYSTORE_STORE_PASSWORD`, `PLAY_CONFIG_JSON`.
 
 ## License

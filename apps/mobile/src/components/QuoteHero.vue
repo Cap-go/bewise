@@ -76,6 +76,8 @@ async function copy() {
       :key="bg"
       :src="bg"
       alt=""
+      fetchpriority="high"
+      decoding="async"
       class="animate-kenburns absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
       :class="imageLoaded ? 'opacity-100' : 'opacity-0'"
       @load="imageLoaded = true"
