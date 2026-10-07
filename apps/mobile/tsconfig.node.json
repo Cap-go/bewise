@@ -7,9 +7,9 @@
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "types": ["node"],
-    "skipLibCheck": true,
     "strict": true,
-    "noEmit": true
+    "noEmit": true,
+    "skipLibCheck": true
   },
   "include": ["vite.config.ts", "capacitor.config.ts"]
 }

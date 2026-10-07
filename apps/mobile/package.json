@@ -1,8 +1,8 @@
 {
   "name": "@bewise/mobile",
-  "private": true,
-  "version": "3.0.0",
   "type": "module",
+  "version": "3.0.0",
+  "private": true,
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vue-tsc -b && vite build",

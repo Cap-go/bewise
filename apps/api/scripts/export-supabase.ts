@@ -6,6 +6,7 @@
 // Use the service role key to include users (RLS hides them from the anon key).
 
 import { mkdirSync, writeFileSync } from 'node:fs'
+import process from 'node:process'
 
 const url = process.env.SUPABASE_URL
 const key = process.env.SUPABASE_KEY
@@ -29,7 +30,7 @@ async function fetchAll<T>(table: string, select: string, order: string): Promis
       throw new Error(`${table}: ${res.status} ${await res.text()}`)
     const page = await res.json() as T[]
     rows.push(...page)
-        if (page.length < PAGE)
+    if (page.length < PAGE)
       break
   }
   console.log(`${table}: ${rows.length}`)

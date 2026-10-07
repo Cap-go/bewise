@@ -1,0 +1,11 @@
+{
+  "name": "BeWise: Daily Wisdom Quotes",
+  "subtitle": "One beautiful quote each day",
+  "keywords": "motivation,inspiration,daily quote,wisdom,affirmation,mindset,positive,stoic,mindfulness,morning",
+  "promotionalText": "Take ten seconds each morning for one good thought. Free, no account, no ads.",
+  "description": "BeWise brings you one beautiful quote every morning, set on a full-screen photograph. Take ten seconds, read it, and carry one good thought through your day.\n\n• A new quote every day, from more than 1,100 hand-picked quotes\n• 9 themes: Inspiration, Leadership, Life, Love, Humour, Art, Sports, Students and Programming\n• Read in English, French, Spanish, German or Italian\n• Share any quote as a ready-to-post image card\n• A gentle daily reminder at the time you choose\n• Browse every past quote in the archive\n• Put your quote on the lock screen with the BeWise iOS Shortcut\n• Free. No account. No ads. No tracking.\n\nBeWise is open source and built with Capacitor by the Capgo team.",
+  "whatsNew": "BeWise 3.0 is a complete rebuild:\n• A fresh quote every morning again\n• New design with a native tab bar and smooth transitions\n• Share quotes as beautiful image cards\n• Daily reminder at the time you choose\n• Better iPad layout and five languages",
+  "supportUrl": "https://bewise.love/support",
+  "marketingUrl": "https://bewise.love",
+  "privacyPolicyUrl": "https://bewise.love/privacy"
+}

@@ -7,8 +7,10 @@
     "directory": "./dist",
     "not_found_handling": "404-page"
   },
+  // Routes (not custom domains): the zone keeps its proxied DNS records and the
+  // Worker answers every request before it reaches the old origin.
   "routes": [
-    { "pattern": "bewise.love", "custom_domain": true },
-    { "pattern": "www.bewise.love", "custom_domain": true }
+    { "pattern": "bewise.love/*", "zone_name": "bewise.love" },
+    { "pattern": "www.bewise.love/*", "zone_name": "bewise.love" }
   ]
 }

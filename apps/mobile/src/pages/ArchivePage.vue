@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import type { Quote } from '~/lib/api'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import PageShell from '~/components/PageShell.vue'
 import PageTitle from '~/components/PageTitle.vue'
-import type { Quote } from '~/lib/api'
 import { api, localDay, photo } from '~/lib/api'
 import { categoryName } from '~/lib/catalog'
 import { push } from '~/lib/chrome'
@@ -20,13 +20,18 @@ const done = ref(false)
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | undefined
 
+let generation = 0
+
 async function more() {
   if (loading.value || done.value)
     return
   loading.value = true
+  const current = generation
   try {
     const before = quotes.value.at(-1)?.date ?? localDay()
     const page = await api.archive(state.category, state.lang, before)
+    if (current !== generation)
+      return
     page.forEach(q => quoteCache.set(q.id, q))
     quotes.value.push(...page)
     done.value = page.length === 0
@@ -38,6 +43,8 @@ async function more() {
 }
 
 function reset() {
+  generation++
+  loading.value = false
   quotes.value = []
   done.value = false
   void more()
@@ -48,8 +55,9 @@ function open(quote: Quote) {
   void push(router, `/archive/${quote.id}`)
 }
 
-const formatDate = (day: string) =>
-  new Date(`${day}T12:00:00`).toLocaleDateString(locale.value, { month: 'short', day: 'numeric', year: 'numeric' })
+function formatDate(day: string) {
+  return new Date(`${day}T12:00:00`).toLocaleDateString(locale.value, { month: 'short', day: 'numeric', year: 'numeric' })
+}
 
 watch(() => [state.category, state.lang], reset)
 

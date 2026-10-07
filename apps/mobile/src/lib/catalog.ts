@@ -1,5 +1,5 @@
-import { ref, watch } from 'vue'
 import type { Category } from './api'
+import { ref, watch } from 'vue'
 import { api } from './api'
 import { state } from './state'
 

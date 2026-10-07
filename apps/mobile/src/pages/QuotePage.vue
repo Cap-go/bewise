@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import type { Quote } from '~/lib/api'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import PageShell from '~/components/PageShell.vue'
 import QuoteHero from '~/components/QuoteHero.vue'
-import type { Quote } from '~/lib/api'
 import { api } from '~/lib/api'
 import { categoryName } from '~/lib/catalog'
 import { back, isNative } from '~/lib/chrome'

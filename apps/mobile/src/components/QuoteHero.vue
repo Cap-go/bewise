@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { Quote } from '~/lib/api'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { Quote } from '~/lib/api'
 import { api, photo } from '~/lib/api'
 import { haptic, showToast } from '~/lib/feedback'
 import { copyQuote, shareQuote } from '~/lib/share'

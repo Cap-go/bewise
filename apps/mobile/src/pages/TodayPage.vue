@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import type { Quote } from '~/lib/api'
 import { App } from '@capacitor/app'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import PageShell from '~/components/PageShell.vue'
 import QuoteHero from '~/components/QuoteHero.vue'
-import type { Quote } from '~/lib/api'
 import { api, localDay } from '~/lib/api'
 import { categoryName } from '~/lib/catalog'
 import { state } from '~/lib/state'

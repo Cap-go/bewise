@@ -1,9 +1,9 @@
+import type { Quote } from './api'
 import { Clipboard } from '@capacitor/clipboard'
 import { Capacitor } from '@capacitor/core'
 import { Directory, Filesystem } from '@capacitor/filesystem'
 import { Share } from '@capacitor/share'
 import { i18n } from '~/i18n'
-import type { Quote } from './api'
 import { photo } from './api'
 
 const W = 1080

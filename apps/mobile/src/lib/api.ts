@@ -29,8 +29,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>
 }
 
-const qs = (params: Record<string, string | number | undefined>) =>
-  new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)])).toString()
+function qs(params: Record<string, string | number | undefined>) {
+  return new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)])).toString()
+}
 
 export const api = {
   today: (category: string, lang: string, date: string, user: string) =>

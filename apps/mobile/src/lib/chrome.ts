@@ -1,3 +1,5 @@
+import type { RouteLocationNormalized, Router } from 'vue-router'
+import type { TabId } from './tabs'
 // Native chrome: the tab bar and nav bar are real UIKit / Android views from
 // @capgo/capacitor-native-navigation. Page bodies animate with
 // @capgo/capacitor-transitions. One animation layer per navigation:
@@ -8,12 +10,13 @@ import { Capacitor } from '@capacitor/core'
 import { NativeNavigation } from '@capgo/capacitor-native-navigation'
 import { setDirection } from '@capgo/capacitor-transitions/vue'
 import { nextTick } from 'vue'
-import type { RouteLocationNormalized, Router } from 'vue-router'
 import { i18n, onLocaleChange } from '~/i18n'
-import type { TabId } from './tabs'
 import { TABS } from './tabs'
 
 export const isNative = Capacitor.isNativePlatform()
+const isAndroid = Capacitor.getPlatform() === 'android'
+// iOS draws system Liquid Glass; Android bars need an explicit dark surface.
+const SURFACE = isAndroid ? { background: '#0b1016' } : {}
 
 const BRAND = '#00c0ff'
 
@@ -40,15 +43,16 @@ async function renderChrome(route: RouteLocationNormalized) {
     title: route.meta.title ? t(route.meta.title as string) : '',
     large: isRoot,
     transparent: true,
-    backButton: { visible: false },
-    leftItems: isRoot ? [] : [BACK_ITEM],
-    colors: { tint: BRAND, foreground: '#ffffff' },
+    // Android has a native back arrow; the iOS text back button would be empty, so use a chevron item.
+    backButton: { visible: isAndroid && !isRoot },
+    leftItems: isRoot || isAndroid ? [] : [BACK_ITEM],
+    colors: { tint: BRAND, foreground: '#ffffff', ...SURFACE },
   })
 
   await NativeNavigation.setTabbar({
     selectedId: tab,
     labelVisibilityMode: 'labeled',
-    colors: { tint: BRAND, inactiveTint: '#9aa4b2' },
+    colors: { tint: BRAND, inactiveTint: '#9aa4b2', ...SURFACE },
     tabs: TABS.map(x => ({
       id: x.id,
       title: t(`tabs.${x.id}`),
