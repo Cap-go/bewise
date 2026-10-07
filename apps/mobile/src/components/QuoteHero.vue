@@ -70,7 +70,7 @@ async function copy() {
 
 <template>
   <section class="relative flex w-full flex-1 flex-col overflow-hidden bg-ink" @click="onTap">
-    <div class="absolute inset-0 brand-gradient opacity-90" />
+    <div class="photo-placeholder absolute inset-0" />
     <img
       v-if="bg"
       :key="bg"

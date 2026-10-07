@@ -77,8 +77,8 @@ onUnmounted(() => observer?.disconnect())
       <ul class="grid gap-3 px-4 md:grid-cols-2">
         <li v-for="quote in quotes" :key="quote.id">
           <button class="pressable flex w-full gap-4 rounded-3xl bg-ink-2 p-3 text-left ring-1 ring-white/5" @click="open(quote)">
-            <div class="brand-gradient relative h-28 w-20 shrink-0 overflow-hidden rounded-2xl">
-              <img v-if="quote.img" :src="photo(quote.img, 80, 112)" alt="" loading="lazy" class="absolute inset-0 h-full w-full object-cover">
+            <div class="photo-placeholder relative h-28 w-20 shrink-0 overflow-hidden rounded-2xl">
+              <img v-if="quote.img" :src="photo(quote.img, 80, 112)" alt="" loading="lazy" class="fade-in absolute inset-0 h-full w-full object-cover" @load="($event.target as HTMLImageElement).classList.add('loaded')">
             </div>
             <div class="flex min-w-0 flex-1 flex-col py-1">
               <p class="text-xs font-semibold tracking-wide text-sky uppercase">

@@ -33,11 +33,11 @@ onMounted(() => {
         <button
           v-for="(category, i) in categories"
           :key="category.id"
-          class="pressable brand-gradient relative aspect-[4/5] overflow-hidden rounded-3xl text-left"
+          class="pressable photo-placeholder relative aspect-[4/5] overflow-hidden rounded-3xl text-left"
           :class="state.category === category.id ? 'ring-[3px] ring-sky ring-offset-2 ring-offset-ink' : ''"
           @click="pick(category.id)"
         >
-          <img v-if="category.img" :src="photo(category.img, 200, 250)" alt="" :loading="i > 5 ? 'lazy' : 'eager'" class="absolute inset-0 h-full w-full object-cover">
+          <img v-if="category.img" :src="photo(category.img, 200, 250)" alt="" :loading="i > 5 ? 'lazy' : 'eager'" class="fade-in absolute inset-0 h-full w-full object-cover" @load="($event.target as HTMLImageElement).classList.add('loaded')">
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
           <span
             v-if="state.category === category.id"

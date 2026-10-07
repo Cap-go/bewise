@@ -67,7 +67,7 @@ onUnmounted(() => void resume.then(h => h.remove()))
         :eyebrow="t('today.eyebrow')"
         :category="categoryName(quote.category)"
       />
-      <div v-else class="brand-gradient grid flex-1 place-items-center px-10 text-center">
+      <div v-else class="photo-placeholder grid flex-1 place-items-center px-10 text-center">
         <div v-if="status === 'error'" class="space-y-5">
           <p class="font-serif text-2xl text-white">
             {{ t('today.error') }}
