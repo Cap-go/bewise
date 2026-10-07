@@ -51,6 +51,27 @@
     "about": "Über",
     "version": "Version",
     "madeBy": "Open Source, gebaut mit Capacitor, live aktualisiert mit Capgo.",
-    "madeWith": "Erstellt mit Capgo"
+    "madeWith": "Erstellt mit Capgo",
+    "howItWorks": "So funktioniert BeWise"
+  },
+  "onboarding": {
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "start": "Los geht’s",
+    "welcomeTitle": "Ein guter Gedanke, jeden Morgen",
+    "welcomeBody": "BeWise wählt jeden Tag ein Zitat für dich aus und zeigt es auf einem schönen Foto. Zehn Sekunden zum Lesen, ein ganzer Tag zum Mitnehmen.",
+    "themeTitle": "Was möchtest du hören?",
+    "themeBody": "Wähle ein Thema für dein tägliches Zitat. Du kannst es jederzeit unter Themen ändern.",
+    "reminderTitle": "Eine sanfte Erinnerung",
+    "reminderBody": "Erhalte zu deiner Wunschzeit eine leise Erinnerung an dein Zitat.",
+    "reminderOn": "Erinnere mich",
+    "reminderSet": "Erinnerung um {time}",
+    "reminderLater": "Nicht jetzt",
+    "widgetTitle": "Auf deinem Home-Bildschirm",
+    "widgetBody": "Füge das BeWise-Widget hinzu und sieh das Zitat des Tages samt Foto, ohne die App zu öffnen.",
+    "widgetIos": "Halte den Home-Bildschirm gedrückt, tippe auf Bearbeiten, dann auf Widget hinzufügen und suche nach BeWise. Passe den Sperrbildschirm an, um es auch dort hinzuzufügen.",
+    "widgetAndroid": "Halte den Startbildschirm gedrückt, tippe auf Widgets und wähle BeWise.",
+    "widgetWeb": "Auf iPhone und Android kannst du das BeWise-Widget zum Startbildschirm hinzufügen.",
+    "sampleQuote": "Der beste Weg anzufangen ist, aufzuhören zu reden und mit dem Tun zu beginnen."
   }
 }

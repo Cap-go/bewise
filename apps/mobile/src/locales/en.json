@@ -51,6 +51,27 @@
     "about": "About",
     "version": "Version",
     "madeBy": "Open source, built with Capacitor and shipped with Capgo live updates.",
-    "madeWith": "Made with Capgo"
+    "madeWith": "Made with Capgo",
+    "howItWorks": "How BeWise works"
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Continue",
+    "start": "Start reading",
+    "welcomeTitle": "One good thought, every morning",
+    "welcomeBody": "Each day BeWise picks a quote for you and sets it on a beautiful photo. Ten seconds to read, a whole day to carry.",
+    "themeTitle": "What do you need to hear?",
+    "themeBody": "Pick a theme for your daily quote. You can change it anytime in Themes.",
+    "reminderTitle": "A gentle nudge",
+    "reminderBody": "Get a quiet reminder to read your quote at the time that suits you.",
+    "reminderOn": "Remind me",
+    "reminderSet": "Reminder set for {time}",
+    "reminderLater": "Not now",
+    "widgetTitle": "Keep it on your home screen",
+    "widgetBody": "Add the BeWise widget to see today’s quote and its photo without opening the app.",
+    "widgetIos": "Touch and hold your Home Screen, tap Edit, then Add Widget and search for BeWise. Customize your Lock Screen to add it there too.",
+    "widgetAndroid": "Touch and hold your home screen, tap Widgets, then find BeWise.",
+    "widgetWeb": "On iPhone and Android, add the BeWise widget to your home screen.",
+    "sampleQuote": "The best way to get started is to quit talking and begin doing."
   }
 }

@@ -17,6 +17,8 @@ export interface AppState {
   lang: string
   reminder: boolean
   reminderTime: string
+  /** Finished the first-launch walkthrough. */
+  onboarded: boolean
 }
 
 function deviceLang(): string {
@@ -30,6 +32,7 @@ export const state = reactive<AppState>({
   lang: deviceLang(),
   reminder: false,
   reminderTime: '08:00',
+  onboarded: false,
 })
 
 const KEY = 'bewise.state'

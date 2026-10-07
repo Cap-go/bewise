@@ -17,6 +17,6 @@ onMounted(() => {
   <cap-router-outlet ref="outlet">
     <router-view />
   </cap-router-outlet>
-  <WebTabbar v-if="!isNative" />
+  <WebTabbar v-if="!isNative && $route.meta.tabbar !== false" />
   <AppToast />
 </template>

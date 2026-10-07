@@ -50,6 +50,7 @@ async function renderChrome(route: RouteLocationNormalized) {
   })
 
   await NativeNavigation.setTabbar({
+    hidden: route.meta.tabbar === false,
     selectedId: tab,
     labelVisibilityMode: 'labeled',
     colors: { tint: BRAND, inactiveTint: '#9aa4b2', ...SURFACE },

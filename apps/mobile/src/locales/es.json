@@ -51,6 +51,27 @@
     "about": "Acerca de",
     "version": "Versión",
     "madeBy": "Código abierto, hecho con Capacitor y actualizado en vivo con Capgo.",
-    "madeWith": "Hecho con Capgo"
+    "madeWith": "Hecho con Capgo",
+    "howItWorks": "Cómo funciona BeWise"
+  },
+  "onboarding": {
+    "skip": "Omitir",
+    "next": "Continuar",
+    "start": "Empezar a leer",
+    "welcomeTitle": "Un buen pensamiento, cada mañana",
+    "welcomeBody": "Cada día BeWise elige una frase para ti y la coloca sobre una bonita foto. Diez segundos para leerla, todo un día para llevarla contigo.",
+    "themeTitle": "¿Qué necesitas escuchar?",
+    "themeBody": "Elige un tema para tu frase diaria. Puedes cambiarlo cuando quieras en Temas.",
+    "reminderTitle": "Un suave recordatorio",
+    "reminderBody": "Recibe un aviso discreto para leer tu frase a la hora que prefieras.",
+    "reminderOn": "Recordármelo",
+    "reminderSet": "Recordatorio a las {time}",
+    "reminderLater": "Ahora no",
+    "widgetTitle": "Tenla en tu pantalla de inicio",
+    "widgetBody": "Añade el widget de BeWise para ver la frase del día y su foto sin abrir la app.",
+    "widgetIos": "Mantén pulsada la pantalla de inicio, toca Editar, luego Añadir widget y busca BeWise. Personaliza la pantalla de bloqueo para añadirlo también allí.",
+    "widgetAndroid": "Mantén pulsada la pantalla de inicio, toca Widgets y busca BeWise.",
+    "widgetWeb": "En iPhone y Android, añade el widget de BeWise a tu pantalla de inicio.",
+    "sampleQuote": "La mejor forma de empezar es dejar de hablar y empezar a hacer."
   }
 }
