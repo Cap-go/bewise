@@ -19,6 +19,8 @@ export async function scheduleReminder(time: string): Promise<boolean> {
       title: i18n.global.t('settings.notifTitle'),
       body: i18n.global.t('settings.notifBody'),
       schedule: { on: { hour, minute }, repeats: true, allowWhileIdle: true },
+      // Inexact is fine for a daily nudge and needs no special Android permission.
+      isExactNotification: false,
     }],
   })
   return true
