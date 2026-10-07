@@ -139,6 +139,13 @@ onMounted(async () => {
         <p class="mt-1 text-[0.8rem] leading-relaxed text-white/40">
           {{ t('settings.madeBy') }}
         </p>
+        <button
+          class="pressable mx-auto mt-5 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1.5 pr-4 pl-1.5 text-[0.85rem] font-semibold text-white/80"
+          @click="open('https://capgo.app/?ref=bewise')"
+        >
+          <img src="/capgo.svg" alt="" class="size-6 rounded-full">
+          {{ t('settings.madeWith') }}
+        </button>
       </div>
     </div>
   </PageShell>

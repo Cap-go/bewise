@@ -50,6 +50,7 @@
     "privacy": "Privacidad",
     "about": "Acerca de",
     "version": "Versión",
-    "madeBy": "Código abierto, hecho con Capacitor y actualizado en vivo con Capgo."
+    "madeBy": "Código abierto, hecho con Capacitor y actualizado en vivo con Capgo.",
+    "madeWith": "Hecho con Capgo"
   }
 }
