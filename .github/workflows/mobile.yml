@@ -99,6 +99,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      # One cloud build at a time keeps us inside the Capgo plan's concurrency.
+      max-parallel: 1
       matrix:
         platform: [ios, android]
     steps:
@@ -111,6 +113,14 @@ jobs:
       - name: Build web and sync native project
         working-directory: apps/mobile
         run: bun run build && bunx cap sync ${{ matrix.platform }}
+      - name: Point Android at the bundled node_modules
+        # Capgo Cloud Build puts --node-modules at the root of the uploaded
+        # project and rewrites iOS paths itself; Android needs the same.
+        if: matrix.platform == 'android'
+        working-directory: apps/mobile/android
+        run: |
+          grep -rl '\.\./\.\./\.\./node_modules/' --include='*.gradle' . | xargs -r sed -i 's#\(\.\./\)\{3,\}node_modules/#../node_modules/#g'
+          grep -rh "node_modules" capacitor.settings.gradle | head -3
       - name: Capgo Cloud Build and store upload
         working-directory: apps/mobile
         env:
