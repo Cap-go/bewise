@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">Tu frase del día, con su foto.</string>
+    <string name="widget_eyebrow">Frase del día</string>
+</resources>

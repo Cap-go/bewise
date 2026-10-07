@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">La tua citazione del giorno, con la sua foto.</string>
+    <string name="widget_eyebrow">Citazione del giorno</string>
+</resources>

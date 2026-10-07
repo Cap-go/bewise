@@ -43,3 +43,6 @@ project(':capgo-capacitor-native-navigation').projectDir = new File('../../../no
 
 include ':capgo-capacitor-updater'
 project(':capgo-capacitor-updater').projectDir = new File('../../../node_modules/@capgo/capacitor-updater/android')
+
+include ':capgo-capacitor-widget-kit'
+project(':capgo-capacitor-widget-kit').projectDir = new File('../../../node_modules/@capgo/capacitor-widget-kit/android')

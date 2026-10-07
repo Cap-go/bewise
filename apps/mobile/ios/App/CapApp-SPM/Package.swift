@@ -4,7 +4,7 @@ import PackageDescription
 // DO NOT MODIFY THIS FILE - managed by Capacitor CLI commands
 let package = Package(
     name: "CapApp-SPM",
-    platforms: [.iOS(.v15)],
+    platforms: [.iOS(.v16)],
     products: [
         .library(
             name: "CapApp-SPM",
@@ -25,7 +25,8 @@ let package = Package(
         .package(name: "CapacitorStatusBar", path: "../../../../../node_modules/@capacitor/status-bar"),
         .package(name: "CapgoCapacitorInAppReview", path: "../../../../../node_modules/@capgo/capacitor-in-app-review"),
         .package(name: "CapgoCapacitorNativeNavigation", path: "../../../../../node_modules/@capgo/capacitor-native-navigation"),
-        .package(name: "CapgoCapacitorUpdater", path: "../../../../../node_modules/@capgo/capacitor-updater")
+        .package(name: "CapgoCapacitorUpdater", path: "../../../../../node_modules/@capgo/capacitor-updater"),
+        .package(name: "CapgoCapacitorWidgetKit", path: "../../../../../node_modules/@capgo/capacitor-widget-kit")
     ],
     targets: [
         .target(
@@ -46,7 +47,8 @@ let package = Package(
                 .product(name: "CapacitorStatusBar", package: "CapacitorStatusBar"),
                 .product(name: "CapgoCapacitorInAppReview", package: "CapgoCapacitorInAppReview"),
                 .product(name: "CapgoCapacitorNativeNavigation", package: "CapgoCapacitorNativeNavigation"),
-                .product(name: "CapgoCapacitorUpdater", package: "CapgoCapacitorUpdater")
+                .product(name: "CapgoCapacitorUpdater", package: "CapgoCapacitorUpdater"),
+                .product(name: "CapgoCapacitorWidgetKit", package: "CapgoCapacitorWidgetKit")
             ]
         )
     ]

@@ -27,6 +27,17 @@
             </intent-filter>
         </activity>
 
+        <receiver
+            android:name=".QuoteWidgetProvider"
+            android:exported="false"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="app.capgo.widgetkit.ACTION_NATIVE_WIDGET_BRIDGE_CHANGED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_quote_info" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

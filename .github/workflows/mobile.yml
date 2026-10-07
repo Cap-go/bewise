@@ -126,6 +126,14 @@ jobs:
         run: |
           grep -rl '\.\./\.\./\.\./node_modules/' --include='*.gradle' . | xargs -r sed -i 's#\(\.\./\)\{3,\}node_modules/#../node_modules/#g'
           grep -rh "node_modules" capacitor.settings.gradle | head -3
+      - name: Point the iOS widget at the bundled node_modules
+        # The widget extension links CapgoWidgetKitShared from a local Swift
+        # package; Capgo rewrites CapApp-SPM paths but not the Xcode project.
+        if: matrix.platform == 'ios'
+        working-directory: apps/mobile/ios/App
+        run: |
+          sed -i -E 's#relativePath = "(\.\./)+node_modules/#relativePath = "../../node_modules/#' App.xcodeproj/project.pbxproj
+          grep -n 'relativePath = ".*node_modules' App.xcodeproj/project.pbxproj
       - name: Capgo Cloud Build and store upload
         working-directory: apps/mobile
         env:

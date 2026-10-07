@@ -30,6 +30,7 @@
     "@capgo/capacitor-native-navigation": "^8.4.2",
     "@capgo/capacitor-transitions": "^8.2.4",
     "@capgo/capacitor-updater": "^8.52.1",
+    "@capgo/capacitor-widget-kit": "^8.1.10",
     "@fontsource-variable/fraunces": "latest",
     "@fontsource-variable/inter": "latest",
     "vue": "^3.5.43",

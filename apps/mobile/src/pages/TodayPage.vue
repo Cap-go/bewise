@@ -9,6 +9,7 @@ import QuoteHero from '~/components/QuoteHero.vue'
 import { api, localDay } from '~/lib/api'
 import { categoryName } from '~/lib/catalog'
 import { state } from '~/lib/state'
+import { syncWidget } from '~/lib/widget'
 
 const { t } = useI18n()
 const quote = ref<Quote | null>(null)
@@ -28,6 +29,7 @@ async function load() {
     quote.value = fresh
     status.value = 'ready'
     localStorage.setItem(CACHE, JSON.stringify({ key: cacheKey, quote: fresh }))
+    void syncWidget(fresh)
   }
   catch {
     if (cached) {
