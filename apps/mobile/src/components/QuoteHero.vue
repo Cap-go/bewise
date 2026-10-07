@@ -69,7 +69,7 @@ async function copy() {
 </script>
 
 <template>
-  <section class="relative h-full w-full overflow-hidden bg-ink" @click="onTap">
+  <section class="relative flex w-full flex-1 flex-col overflow-hidden bg-ink" @click="onTap">
     <div class="absolute inset-0 brand-gradient opacity-90" />
     <img
       v-if="bg"
@@ -84,7 +84,7 @@ async function copy() {
     >
     <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/85" />
 
-    <div class="relative mx-auto flex h-full max-w-3xl flex-col px-7 md:px-12" :style="{ paddingTop: 'calc(var(--nav-top) + 18px)', paddingBottom: 'calc(var(--nav-bottom) + 22px)' }">
+    <div class="relative mx-auto flex w-full max-w-3xl flex-1 flex-col px-7 md:px-12" :style="{ paddingTop: 'calc(var(--nav-top) + 18px)', paddingBottom: 'calc(var(--nav-bottom) + 22px)' }">
       <header class="animate-rise flex items-center justify-between gap-3">
         <div>
           <p class="text-[0.7rem] font-semibold tracking-[0.18em] text-white/70 uppercase">

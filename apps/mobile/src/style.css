@@ -44,14 +44,21 @@ body {
   -webkit-user-select: none;
 }
 
-cap-router-outlet,
-cap-page {
+cap-router-outlet {
   display: block;
   height: 100%;
 }
 
+/* Keep cap-page's own flex column layout: forcing display:block lets the
+   content area grow to its full height and get clipped instead of scrolling. */
 cap-page {
-  background: var(--color-ink);
+  --cap-page-background: var(--color-ink);
+  --cap-page-color: white;
+  height: 100%;
+}
+
+cap-content {
+  min-height: 0;
 }
 
 .page-scroll {

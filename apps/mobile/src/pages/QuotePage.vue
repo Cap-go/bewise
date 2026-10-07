@@ -26,8 +26,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageShell :scroll="false">
-    <div class="relative h-dvh">
+  <PageShell>
+    <div class="relative flex min-h-full flex-col">
       <QuoteHero v-if="quote" :key="quote.id" :quote="quote" :eyebrow="t('archive.title')" :category="categoryName(quote.category)" />
       <button
         v-if="!isNative"
