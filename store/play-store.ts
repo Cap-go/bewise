@@ -41,6 +41,21 @@ async function call(url: string, method = 'GET', body?: unknown, contentType = '
   return text ? JSON.parse(text) : null
 }
 
+// Some apps must send changes for review from the Play Console; others send
+// them automatically. Try the automatic path, fall back to the manual one.
+async function commit(editUrl: string): Promise<string> {
+  try {
+    await call(`${editUrl}:commit`, 'POST')
+    return 'sent for review'
+  }
+  catch (error) {
+    if (!String(error).includes('changesNotSentForReview'))
+      throw error
+    await call(`${editUrl}:commit?changesNotSentForReview=true`, 'POST')
+    return 'saved; click "Send for review" in Play Console'
+  }
+}
+
 const LOCALES: Record<string, string> = { 'en-US': 'en', 'fr-FR': 'fr' }
 const edit = await call(`${API}/edits`, 'POST')
 const e = `${API}/edits/${edit.id}`
@@ -63,6 +78,4 @@ for (const [locale, lang] of Object.entries(LOCALES)) {
   console.log(`${locale}: listing and graphics updated`)
 }
 
-// This app requires changes to be sent for review from the Play Console.
-await call(`${e}:commit?changesNotSentForReview=true`, 'POST')
-console.log('committed (send for review in Play Console)')
+console.log(`listing ${await commit(e)}`)

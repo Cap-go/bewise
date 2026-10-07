@@ -2,8 +2,6 @@
 //
 //   PLAY_CONFIG_JSON=<service account json or base64> bun store/play-release.ts app.aab 3.0.8
 //
-// BeWise's Play app requires changes to be sent for review from the Play
-// Console, so the edit is committed with changesNotSentForReview=true.
 import { createSign } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -43,6 +41,21 @@ async function call(url: string, method = 'GET', body?: unknown, contentType = '
   return text ? JSON.parse(text) : null
 }
 
+// Some apps must send changes for review from the Play Console; others send
+// them automatically. Try the automatic path, fall back to the manual one.
+async function commit(editUrl: string): Promise<string> {
+  try {
+    await call(`${editUrl}:commit`, 'POST')
+    return 'sent for review'
+  }
+  catch (error) {
+    if (!String(error).includes('changesNotSentForReview'))
+      throw error
+    await call(`${editUrl}:commit?changesNotSentForReview=true`, 'POST')
+    return 'saved; click "Send for review" in Play Console'
+  }
+}
+
 const notes = [['en-US', 'en-GB'], ['fr-FR', 'fr-FR']].map(([language, file]) => ({
   language,
   text: JSON.parse(readFileSync(join(ROOT, 'metadata', `${file}.json`), 'utf8')).whatsNew.slice(0, 500),
@@ -55,5 +68,4 @@ await call(`${API}/edits/${edit.id}/tracks/production`, 'PUT', {
   track: 'production',
   releases: [{ name: versionName, status: 'completed', versionCodes: [String(bundle.versionCode)], releaseNotes: notes }],
 })
-await call(`${API}/edits/${edit.id}:commit?changesNotSentForReview=true`, 'POST')
-console.log(`production release ${versionName} ready: click "Send for review" in Play Console`)
+console.log(`production release ${versionName}: ${await commit(`${API}/edits/${edit.id}`)}`)
