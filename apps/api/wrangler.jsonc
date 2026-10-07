@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bewise-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "account_id": "9ee3d7479a3c359681e3fab2c8cb22c0",
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "api.bewise.love", "custom_domain": true }],
+  "triggers": { "crons": ["5 0 * * *"] },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bewise",
+      "database_id": "48abd16f-3873-4988-8a14-67426d507259",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

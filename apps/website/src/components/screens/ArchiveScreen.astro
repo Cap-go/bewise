@@ -1,0 +1,33 @@
+---
+import StatusBar from './StatusBar.astro'
+import TabBar from './TabBar.astro'
+
+const items = [
+  { date: 'Oct 6', text: 'The secret of getting ahead is getting started.', author: 'Mark Twain', hue: 'from-[#1fa2ff]/40' },
+  { date: 'Oct 5', text: 'Well done is better than well said.', author: 'Benjamin Franklin', hue: 'from-[#a6ffcb]/30' },
+  { date: 'Oct 4', text: 'What we achieve inwardly will change outer reality.', author: 'Plutarch', hue: 'from-[#ff5f8f]/30' },
+  { date: 'Oct 3', text: 'Dwell on the beauty of life.', author: 'Marcus Aurelius', hue: 'from-[#00d9f2]/35' },
+  { date: 'Oct 2', text: 'Knowing yourself is the beginning of all wisdom.', author: 'Aristotle', hue: 'from-[#1fa2ff]/30' },
+]
+---
+
+<div class="relative h-full w-full overflow-hidden bg-ink">
+  <StatusBar />
+  <div class="px-[6cqw] pt-[19cqw]">
+    <p class="font-serif text-[9cqw] font-semibold tracking-tight">Archive</p>
+    <p class="mt-[1cqw] text-[3.3cqw] text-white/60">Every past quote in Inspiration</p>
+    <ul class="mt-[5cqw] space-y-[3cqw]">
+      {
+        items.map(item => (
+          <li class:list={['rounded-[5cqw] border border-white/10 bg-gradient-to-br to-white/[0.03] p-[4.5cqw]', item.hue]}>
+            <p class="text-[2.6cqw] font-semibold tracking-[0.14em] text-white/55 uppercase">{item.date}</p>
+            <p class="mt-[1.6cqw] font-serif text-[4.4cqw] leading-snug font-medium">{item.text}</p>
+            <p class="mt-[1.6cqw] text-[3cqw] text-white/65">{item.author}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 h-[40cqw] bg-gradient-to-t from-ink to-transparent"></div>
+  <TabBar active="archive" />
+</div>

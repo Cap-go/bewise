@@ -1,0 +1,50 @@
+---
+import StatusBar from './StatusBar.astro'
+import TabBar from './TabBar.astro'
+
+const groups = [
+  [
+    { label: 'Language', value: 'English' },
+    { label: 'Daily reminder', value: 'toggle' },
+    { label: 'Time', value: '8:00' },
+  ],
+  [
+    { label: 'iOS Shortcut', value: '›' },
+    { label: 'Personal API key', value: '••••' },
+  ],
+  [
+    { label: 'Rate BeWise', value: '›' },
+    { label: 'Tell a friend', value: '›' },
+    { label: 'Help & feedback', value: '›' },
+  ],
+]
+---
+
+<div class="relative h-full w-full overflow-hidden bg-ink">
+  <StatusBar />
+  <div class="px-[6cqw] pt-[19cqw]">
+    <p class="font-serif text-[9cqw] font-semibold tracking-tight">Settings</p>
+    <div class="mt-[5cqw] space-y-[4cqw]">
+      {
+        groups.map(group => (
+          <ul class="divide-y divide-white/[0.07] overflow-hidden rounded-[4.5cqw] border border-white/[0.08] bg-ink-2">
+            {group.map(row => (
+              <li class="flex items-center justify-between px-[4.5cqw] py-[3.6cqw] text-[3.6cqw]">
+                <span class="font-medium">{row.label}</span>
+                {row.value === 'toggle'
+                  ? (
+                      <span class="bg-brand relative h-[6.4cqw] w-[11cqw] rounded-full">
+                        <span class="absolute top-[0.6cqw] right-[0.6cqw] size-[5.2cqw] rounded-full bg-white shadow" />
+                      </span>
+                    )
+                  : <span class="text-white/50">{row.value}</span>}
+              </li>
+            ))}
+          </ul>
+        ))
+      }
+    </div>
+    <p class="mt-[5cqw] text-center text-[2.8cqw] leading-relaxed text-white/45">Open source, built with Capacitor and shipped with Capgo live updates.</p>
+  </div>
+  <TabBar active="settings" />
+</div>

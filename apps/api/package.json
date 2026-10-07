@@ -1,0 +1,25 @@
+{
+  "name": "@bewise/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:migrate": "wrangler d1 migrations apply bewise --remote",
+    "db:migrate:local": "wrangler d1 migrations apply bewise --local",
+    "export:supabase": "bun scripts/export-supabase.ts",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "hono": "^4.13.13"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "latest",
+    "@cloudflare/workers-types": "latest",
+    "typescript": "^5.9.3",
+    "vitest": "latest",
+    "wrangler": "^4.148.0"
+  }
+}

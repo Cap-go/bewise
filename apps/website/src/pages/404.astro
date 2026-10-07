@@ -1,0 +1,30 @@
+---
+import QuoteMark from '../components/QuoteMark.astro'
+import StoreButtons from '../components/StoreButtons.astro'
+import Base from '../layouts/Base.astro'
+---
+
+<Base title="Page not found" description="This page doesn’t exist. Here’s a thought instead." noindex>
+  <section class="grain relative isolate overflow-hidden">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+      <div class="absolute -top-40 left-1/2 size-[40rem] -translate-x-1/2 rounded-full bg-blue/20 blur-[120px]"></div>
+      <div class="absolute right-0 bottom-0 size-[26rem] rounded-full bg-rose/10 blur-[120px]"></div>
+    </div>
+    <div class="mx-auto flex min-h-[70vh] max-w-3xl flex-col items-center justify-center px-5 py-24 text-center sm:px-8">
+      <p class="rise text-sm font-semibold tracking-[0.16em] text-aqua uppercase">Error 404</p>
+      <QuoteMark class="rise mt-8 h-12 w-auto text-aqua" />
+      <h1 class="rise font-display mt-6 text-4xl leading-tight font-medium text-balance sm:text-5xl" style="--d:120ms">
+        Not all those who wander are lost. This page, however, is.
+      </h1>
+      <p class="rise mt-5 flex items-center gap-3 text-white/60" style="--d:180ms">
+        <span class="h-px w-8 bg-mint/80"></span>
+        With apologies to J.R.R. Tolkien
+      </p>
+      <div class="rise mt-12 flex flex-wrap justify-center gap-3" style="--d:240ms">
+        <a href="/" class="inline-flex h-12 items-center rounded-full bg-white px-6 font-semibold text-ink transition hover:bg-mint">Back to home</a>
+        <a href="/support" class="inline-flex h-12 items-center rounded-full border border-white/15 px-6 font-semibold transition hover:border-white/35 hover:bg-white/[0.05]">Get support</a>
+      </div>
+      <StoreButtons center class="rise mt-16 opacity-90" />
+    </div>
+  </section>
+</Base>

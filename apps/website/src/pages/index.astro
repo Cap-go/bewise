@@ -1,0 +1,440 @@
+---
+import Phone from '../components/Phone.astro'
+import QuoteMark from '../components/QuoteMark.astro'
+import ArchiveScreen from '../components/screens/ArchiveScreen.astro'
+import SettingsScreen from '../components/screens/SettingsScreen.astro'
+import ThemesScreen from '../components/screens/ThemesScreen.astro'
+import TodayScreen from '../components/screens/TodayScreen.astro'
+import StoreButtons from '../components/StoreButtons.astro'
+import { fallbackQuotes, languages, showcaseCategories, site, sized, themes } from '../data/site'
+import Base from '../layouts/Base.astro'
+
+const q = fallbackQuotes.inspire!
+
+const stats = [
+  { value: '1,100+', label: 'quotes in the archive' },
+  { value: '9', label: 'themes to choose from' },
+  { value: '5', label: 'languages' },
+  { value: 'Since 2019', label: 'on the App Store' },
+]
+
+const screens = [
+  { shot: '/screenshots/today.png', title: 'Today', text: 'One quote, full screen, on a photo worth pausing for.', alt: 'BeWise Today screen showing the quote of the day on a full-bleed photo' },
+  { shot: '/screenshots/archive.png', title: 'Archive', text: 'Scroll back through every quote in your theme.', alt: 'BeWise Archive screen listing past daily quotes' },
+  { shot: '/screenshots/themes.png', title: 'Themes', text: 'Nine moods, from Leadership to Humour.', alt: 'BeWise Themes screen with a grid of quote categories' },
+  { shot: '/screenshots/settings.png', title: 'Settings', text: 'Language, reminder time and your Shortcut key.', alt: 'BeWise Settings screen with language, reminder and shortcut options' },
+]
+
+const stack = [
+  {
+    name: 'Capacitor 8 + Vue',
+    text: 'One web codebase running inside real native iOS and Android shells.',
+    href: 'https://capacitorjs.com',
+  },
+  {
+    name: 'Capgo live updates',
+    text: 'Fixes and copy changes reach every phone in minutes, no store resubmission needed.',
+    href: 'https://capgo.app',
+  },
+  {
+    name: '@capgo/capacitor-native-navigation',
+    text: 'A genuinely native Liquid Glass tab bar, not a web imitation of one.',
+    href: 'https://github.com/Cap-go/capacitor-native-navigation',
+  },
+  {
+    name: '@capgo/capacitor-transitions',
+    text: 'Native-feeling push and fade transitions between pages.',
+    href: 'https://github.com/Cap-go/capacitor-transitions',
+  },
+  {
+    name: 'Cloudflare Workers + D1',
+    text: 'The quote API runs at the edge with an SQLite database, close to every reader.',
+    href: 'https://developers.cloudflare.com/d1/',
+  },
+  {
+    name: 'Astro on Workers',
+    text: 'This website: static HTML, two fonts, one tiny script for the live quote.',
+    href: 'https://astro.build',
+  },
+]
+
+const icon = {
+  sun: 'M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+  image: 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm0 11 5-5 4 4 2-2 5 5M15.5 9.5h.01',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  archive: 'M4 5h16v4H4zM5 9v10h14V9M10 13h4',
+  globe: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3.6 9h16.8M3.6 15h16.8M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18',
+  bell: 'M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0',
+  share: 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13',
+  lock: 'M6 11h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Zm2 0V7a4 4 0 1 1 8 0v4',
+  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Zm-3-10 2 2 4-4',
+}
+---
+
+<Base>
+  <!-- HERO -->
+  <section class="grain relative isolate overflow-hidden">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+      <div class="absolute -top-40 -left-40 size-[38rem] rounded-full bg-blue/25 blur-[120px]"></div>
+      <div class="absolute top-40 -right-32 size-[32rem] rounded-full bg-mint/[0.14] blur-[120px]"></div>
+      <div class="absolute bottom-0 left-1/3 size-[26rem] rounded-full bg-rose/10 blur-[120px]"></div>
+      <div
+        class="absolute inset-0 [background-image:linear-gradient(rgb(255_255_255/0.035)_1px,transparent_1px),linear-gradient(90deg,rgb(255_255_255/0.035)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]"
+      >
+      </div>
+    </div>
+
+    <div class="mx-auto grid max-w-6xl items-center gap-14 px-5 pt-14 pb-20 sm:px-8 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:pt-24 lg:pb-28">
+      <div class="text-center lg:text-left">
+        <p class="rise glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[0.8rem] font-medium text-white/80">
+          <span class="relative flex size-2">
+            <span class="absolute inline-flex size-full animate-ping rounded-full bg-mint opacity-60 motion-reduce:hidden"></span>
+            <span class="relative inline-flex size-2 rounded-full bg-mint"></span>
+          </span>
+          Free &middot; No account &middot; No ads
+        </p>
+        <h1 class="rise font-display mt-6 text-[2.9rem] leading-[1.02] font-semibold text-balance sm:text-6xl lg:text-[4.6rem]" style="--d:80ms">
+          A little wisdom,{' '}
+          <span class="text-gradient font-normal italic sm:block">every morning.</span>
+        </h1>
+        <p class="rise mx-auto mt-6 max-w-xl text-lg leading-relaxed text-pretty text-white/70 lg:mx-0" style="--d:160ms">
+          BeWise gives you one beautiful quote a day, set on a full-bleed photograph. Pick your theme, read it in your language, and carry one good thought with you.
+        </p>
+        <div class="rise mt-9" style="--d:240ms">
+          <StoreButtons class="justify-center lg:justify-start" />
+        </div>
+        <dl class="rise mx-auto mt-12 grid max-w-xl grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-4 lg:mx-0" style="--d:320ms">
+          {
+            stats.map(s => (
+              <div class="text-center lg:text-left">
+                <dt class="sr-only">{s.label}</dt>
+                <dd class="font-display text-2xl font-semibold whitespace-nowrap">{s.value}</dd>
+                <dd class="mt-1 text-xs leading-snug text-white/55">{s.label}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <div class="rise relative mx-auto w-full max-w-[19rem] sm:max-w-[21rem]" style="--d:200ms">
+        <div aria-hidden="true" class="bg-brand absolute inset-x-6 top-16 bottom-10 -z-10 rounded-[4rem] opacity-40 blur-3xl"></div>
+        <div class="float">
+          <Phone screenshot="/screenshots/today.png" alt="BeWise showing today's quote on a full-bleed photo" eager>
+            <TodayScreen live eager />
+          </Phone>
+        </div>
+        <div
+          aria-hidden="true"
+          class="absolute -top-12 hidden w-64 items-start gap-3 rounded-2xl border border-white/15 bg-[#1a232e]/95 p-3 shadow-2xl shadow-black/50 backdrop-blur-xl sm:-left-32 sm:flex lg:-left-44"
+        >
+          <img src="/icon-128.png" alt="" width="36" height="36" class="size-9 rounded-[0.6rem]" />
+          <div class="min-w-0 text-[0.78rem] leading-snug">
+            <p class="flex justify-between font-semibold"><span>BeWise</span><span class="font-normal text-white/50">8:00</span></p>
+            <p class="mt-0.5 font-medium text-white/90">Your daily wisdom is here</p>
+            <p class="text-white/60">Take 10 seconds for today's quote.</p>
+          </div>
+        </div>
+        <div
+          aria-hidden="true"
+          class="absolute top-[24%] hidden items-center gap-2 rounded-full border border-white/15 bg-[#1a232e]/95 py-2 pr-4 pl-2 text-[0.8rem] font-semibold shadow-2xl shadow-black/50 backdrop-blur-xl sm:-right-16 sm:flex lg:-right-20"
+        >
+          <span class="grid size-7 place-items-center rounded-full bg-rose/20 text-rose">
+            <svg viewBox="0 0 24 24" class="size-4 fill-current"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
+          </span>
+          Shared as an image card
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE QUOTE -->
+  <section id="today" class="relative px-5 py-20 sm:px-8 md:py-24" aria-labelledby="today-title">
+    <div class="mx-auto max-w-6xl">
+      <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div class="max-w-xl">
+          <p class="text-sm font-semibold tracking-[0.16em] text-aqua uppercase">Live right now</p>
+          <h2 id="today-title" class="font-display mt-3 text-4xl font-semibold text-balance sm:text-5xl">Today’s quote, straight from the app.</h2>
+          <p class="mt-4 text-lg text-white/65">The same quote BeWise readers opened this morning. Switch the theme or the language to see what they’re reading.</p>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="-mx-5 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0" role="group" aria-label="Theme">
+          <div class="flex w-max gap-2">
+            {
+              showcaseCategories.map((c, i) => (
+                <button
+                  type="button"
+                  data-pick-category={c.id}
+                  aria-pressed={i === 0 ? 'true' : 'false'}
+                  class="h-10 cursor-pointer rounded-full border border-white/10 px-4 text-sm font-medium text-white/70 transition hover:border-white/25 hover:text-white aria-pressed:border-transparent aria-pressed:bg-white aria-pressed:text-ink"
+                >
+                  {c.label}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+        <div class="flex w-max rounded-full border border-white/10 p-1" role="group" aria-label="Language">
+          {
+            languages.map((l, i) => (
+              <button
+                type="button"
+                data-pick-lang={l.id}
+                aria-pressed={i === 0 ? 'true' : 'false'}
+                aria-label={l.label}
+                title={l.label}
+                class="h-8 min-w-11 cursor-pointer rounded-full px-3 text-xs font-semibold tracking-wider text-white/60 uppercase transition hover:text-white aria-pressed:bg-white/12 aria-pressed:text-white"
+              >
+                {l.id}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <figure class="ring-brand relative mt-6 overflow-hidden rounded-[2rem] bg-ink-2 shadow-[0_40px_120px_-40px_rgb(0_192_255/0.35)]">
+        <div class="bg-brand absolute inset-0 opacity-80"></div>
+        <img
+          src={sized(q.img, 1600)}
+          alt=""
+          width="1600"
+          height="900"
+          loading="lazy"
+          decoding="async"
+          class="kenburns absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+          data-live-img="1600"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30"></div>
+        <div class="relative flex min-h-[30rem] flex-col justify-between gap-12 p-7 sm:p-12 md:min-h-[34rem] md:p-16">
+          <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
+            <span class="rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 font-semibold backdrop-blur-md" data-live-category>Inspiration</span>
+            <span class="font-medium text-white/80" data-live-date>Today</span>
+          </div>
+          <blockquote class="max-w-4xl transition-opacity duration-300 [html[data-quote-loading]_&]:opacity-60" data-live-lang lang="en">
+            <QuoteMark class="h-8 w-auto text-aqua sm:h-10" />
+            <p class="font-display mt-6 text-[1.85rem] leading-[1.18] font-medium text-balance drop-shadow-[0_2px_24px_rgb(0_0_0/0.4)] sm:text-5xl md:text-[3.4rem]" aria-live="polite" data-live-text data-size="card">
+              {q.text}
+            </p>
+            <footer class="mt-7 flex items-center gap-3 text-lg font-medium text-white/85">
+              <span class="h-px w-10 bg-mint"></span>
+              <cite class="not-italic" data-live-author>{q.author}</cite>
+            </footer>
+          </blockquote>
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <p class="flex items-center gap-2 text-sm text-white/70">
+              <span class="size-2 rounded-full bg-mint shadow-[0_0_12px_var(--color-mint)]"></span>
+              <span data-live-status>Loading today’s quote…</span>
+            </p>
+            <button
+              type="button"
+              data-copy-quote
+              class="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-ink transition hover:bg-mint"
+            >
+              <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+              <span data-copy-label>Copy quote</span>
+            </button>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="relative px-5 py-20 sm:px-8 md:py-24" aria-labelledby="features-title">
+    <div class="mx-auto max-w-6xl">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold tracking-[0.16em] text-aqua uppercase">Why BeWise</p>
+        <h2 id="features-title" class="font-display mt-3 text-4xl font-semibold text-balance sm:text-5xl">A ten-second ritual that sticks.</h2>
+        <p class="mt-4 text-lg text-white/65">No feed to scroll, no streaks to protect. Just one thought worth keeping, delivered the same calm way every day.</p>
+      </div>
+
+      <div class="mt-14 grid gap-4 md:grid-cols-6">
+        <article class="ring-brand relative overflow-hidden rounded-3xl bg-ink-2 p-8 md:col-span-4">
+          <div aria-hidden="true" class="absolute -top-20 -right-20 size-72 rounded-full bg-aqua/20 blur-3xl"></div>
+          <svg viewBox="0 0 24 24" class="size-7 text-aqua" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icon.sun} /></svg>
+          <h3 class="font-display mt-5 text-2xl font-semibold sm:text-3xl">One quote. Every day.</h3>
+          <p class="mt-3 max-w-md text-white/65">A fresh quote lands each morning, picked from an archive of more than 1,100 hand-picked quotes. It’s the only thing on the screen, so it actually gets read.</p>
+          <p class="font-display mt-8 max-w-lg border-l-2 border-mint/70 pl-5 text-xl leading-snug text-white/90 italic">
+            “The best time to plant a tree was 20 years ago. The second best time is now.”
+            <span class="mt-2 block font-sans text-sm font-medium text-white/55 not-italic">Chinese proverb</span>
+          </p>
+        </article>
+        <article class="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-ink-2 md:col-span-2">
+          <img
+            src={sized('https://images.unsplash.com/photo-1501785888041-af3ef285b470', 700)}
+            alt="Mountain lake at sunset, the kind of photo BeWise sets quotes on"
+            width="700"
+            height="700"
+            loading="lazy"
+            decoding="async"
+            class="absolute inset-0 h-full w-full object-cover opacity-80"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-transparent"></div>
+          <div class="relative flex h-full min-h-80 flex-col justify-end p-8">
+            <svg viewBox="0 0 24 24" class="size-7 text-mint" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icon.image} /></svg>
+            <h3 class="font-display mt-4 text-2xl font-semibold">Full-bleed photos</h3>
+            <p class="mt-2 text-white/70">Every quote sits on a hand-picked photograph, edge to edge.</p>
+          </div>
+        </article>
+
+        <article class="rounded-3xl border border-white/[0.07] bg-ink-2 p-8 md:col-span-3">
+          <svg viewBox="0 0 24 24" class="size-7 text-sky" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icon.grid} /></svg>
+          <h3 class="font-display mt-5 text-2xl font-semibold">9 themes</h3>
+          <p class="mt-2 text-white/65">Choose the voice you need this season. Switch any time.</p>
+          <ul class="mt-6 flex flex-wrap gap-2" aria-label="Themes">
+            {themes.map(t => <li class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-sm text-white/80">{t}</li>)}
+          </ul>
+        </article>
+        <article class="rounded-3xl border border-white/[0.07] bg-ink-2 p-8 md:col-span-3">
+          <svg viewBox="0 0 24 24" class="size-7 text-mint" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icon.globe} /></svg>
+          <h3 class="font-display mt-5 text-2xl font-semibold">Five languages</h3>
+          <p class="mt-2 text-white/65">Read your daily quote in the language you think in.</p>
+          <ul class="mt-6 grid grid-cols-5 gap-2 text-center" aria-label="Languages">
+            {
+              languages.map(l => (
+                <li class="rounded-2xl border border-white/10 bg-white/[0.04] px-1 py-3">
+                  <span class="block text-sm font-semibold tracking-wider uppercase">{l.id}</span>
+                  <span class="mt-0.5 block truncate text-[0.7rem] text-white/55">{l.label}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </article>
+
+        {
+          [
+            { i: icon.archive, color: 'text-aqua', title: 'The whole archive', text: 'Missed a day? Scroll back through every past quote in your theme.' },
+            { i: icon.bell, color: 'text-rose', title: 'A gentle reminder', text: 'Pick a time and BeWise nudges you once a day. Scheduled on your phone.' },
+            { i: icon.share, color: 'text-sky', title: 'Share as an image', text: 'Turn any quote into a polished card for messages and stories.' },
+          ].map(f => (
+            <article class="rounded-3xl border border-white/[0.07] bg-ink-2 p-8 md:col-span-2">
+              <svg viewBox="0 0 24 24" class:list={['size-7', f.color]} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d={f.i} />
+              </svg>
+              <h3 class="font-display mt-5 text-xl font-semibold">{f.title}</h3>
+              <p class="mt-2 text-white/65">{f.text}</p>
+            </article>
+          ))
+        }
+
+        <a href="/shortcut" class="group rounded-3xl border border-white/[0.07] bg-ink-2 p-8 transition hover:border-white/20 md:col-span-3">
+          <svg viewBox="0 0 24 24" class="size-7 text-mint" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icon.lock} /></svg>
+          <h3 class="font-display mt-5 text-xl font-semibold">On your lock screen</h3>
+          <p class="mt-2 text-white/65">Use the BeWise iOS Shortcut and your personal key to get the daily quote anywhere Shortcuts can run.</p>
+          <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-aqua">
+            Set up the Shortcut
+            <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span>
+          </span>
+        </a>
+        <a href="/privacy" class="group rounded-3xl border border-white/[0.07] bg-ink-2 p-8 transition hover:border-white/20 md:col-span-3">
+          <svg viewBox="0 0 24 24" class="size-7 text-sky" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icon.shield} /></svg>
+          <h3 class="font-display mt-5 text-xl font-semibold">Private by design</h3>
+          <p class="mt-2 text-white/65">No account, no ads, no tracking SDKs. Just an anonymous ID on your device to remember your settings.</p>
+          <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-aqua">
+            Read the privacy policy
+            <span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENS -->
+  <section id="screens" class="relative overflow-hidden py-20 md:py-24" aria-labelledby="screens-title">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-1/3 -z-10 mx-auto h-96 max-w-4xl rounded-full bg-blue/15 blur-[120px]"></div>
+    <div class="mx-auto max-w-6xl px-5 sm:px-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="text-sm font-semibold tracking-[0.16em] text-aqua uppercase">Inside the app</p>
+        <h2 id="screens-title" class="font-display mt-3 text-4xl font-semibold text-balance sm:text-5xl">Designed to get out of the way.</h2>
+        <p class="mt-4 text-lg text-white/65">Four screens, a native Liquid Glass tab bar, and nothing you don’t need.</p>
+      </div>
+    </div>
+    <ul class="mx-auto mt-14 flex max-w-6xl snap-x snap-mandatory gap-6 overflow-x-auto px-5 pb-6 sm:px-8 lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible">
+      {
+        screens.map((s, i) => (
+          <li class:list={['w-[66vw] max-w-[16rem] shrink-0 snap-center lg:w-auto lg:max-w-none', i % 2 === 1 && 'lg:translate-y-10']}>
+            <Phone screenshot={s.shot} alt={s.alt}>
+              {i === 0 && <TodayScreen />}
+              {i === 1 && <ArchiveScreen />}
+              {i === 2 && <ThemesScreen />}
+              {i === 3 && <SettingsScreen />}
+            </Phone>
+            <h3 class="font-display mt-6 text-xl font-semibold">{s.title}</h3>
+            <p class="mt-1 text-sm leading-relaxed text-white/60">{s.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- OPEN SOURCE -->
+  <section id="open-source" class="px-5 py-20 sm:px-8 md:py-24" aria-labelledby="oss-title">
+    <div class="ring-brand relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-ink-2 p-7 sm:p-12 md:p-16">
+      <div aria-hidden="true" class="absolute -top-32 -left-24 size-96 rounded-full bg-blue/20 blur-[100px]"></div>
+      <div aria-hidden="true" class="absolute -right-24 -bottom-32 size-96 rounded-full bg-mint/10 blur-[100px]"></div>
+      <div class="relative grid gap-12 *:min-w-0 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+        <div>
+          <p class="text-sm font-semibold tracking-[0.16em] text-aqua uppercase">Open source</p>
+          <h2 id="oss-title" class="font-display mt-3 text-4xl font-semibold text-balance sm:text-5xl">Built in the open.</h2>
+          <p class="mt-5 text-lg leading-relaxed text-white/70">
+            BeWise has been on the App Store since 2019. We rebuilt it from scratch as an open-source showcase by{' '}
+            <a href={site.capgo} class="font-semibold text-white underline decoration-aqua/50 underline-offset-4 hover:decoration-aqua">Capgo</a>:
+            a real, shipping app you can read line by line, from the native tab bar to the edge API.
+          </p>
+          <div class="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-ink/80 font-mono text-[0.82rem] leading-relaxed sm:text-sm">
+            <div class="flex items-center gap-1.5 border-b border-white/[0.07] px-4 py-3" aria-hidden="true">
+              <span class="size-2.5 rounded-full bg-white/15"></span>
+              <span class="size-2.5 rounded-full bg-white/15"></span>
+              <span class="size-2.5 rounded-full bg-white/15"></span>
+            </div>
+            <pre class="overflow-x-auto px-4 py-4 text-white/80"><code><span class="text-white/40">$</span> git clone https://github.com/Cap-go/bewise
+<span class="text-white/40">$</span> cd bewise && bun install
+<span class="text-white/40">$</span> bun run dev <span class="text-mint/70"># the app, in your browser</span></code></pre>
+          </div>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href={site.github} class="inline-flex h-12 items-center gap-2.5 rounded-full bg-white px-6 font-semibold text-ink transition hover:bg-mint">
+              <svg viewBox="0 0 24 24" class="size-5" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.7 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z" /></svg>
+              View on GitHub
+            </a>
+            <a href={site.capgo} class="inline-flex h-12 items-center gap-2 rounded-full border border-white/15 px-6 font-semibold text-white transition hover:border-white/35 hover:bg-white/[0.05]">
+              Ship like this with Capgo
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+        <ul class="grid content-start gap-3 sm:grid-cols-2">
+          {
+            stack.map(item => (
+              <li>
+                <a href={item.href} class="group block h-full rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 transition hover:border-white/20 hover:bg-white/[0.05]">
+                  <p class="flex items-start justify-between gap-3 font-semibold break-words">
+                    <span class="min-w-0">{item.name}</span>
+                    <span aria-hidden="true" class="text-white/30 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-aqua">↗</span>
+                  </p>
+                  <p class="mt-2 text-sm leading-relaxed text-white/60">{item.text}</p>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="px-5 pt-10 pb-24 sm:px-8 md:pb-32" aria-labelledby="cta-title">
+    <div class="mx-auto max-w-3xl text-center">
+      <img src="/icon-128.png" alt="" width="80" height="80" loading="lazy" class="mx-auto size-20 rounded-[1.4rem] shadow-[0_20px_50px_-15px_rgb(0_192_255/0.7)]" />
+      <h2 id="cta-title" class="font-display mt-8 text-4xl font-semibold text-balance sm:text-6xl">
+        Start tomorrow with a <span class="text-gradient italic">better thought.</span>
+      </h2>
+      <p class="mx-auto mt-5 max-w-lg text-lg text-white/65">Free, with no sign-up and no ads. Nothing to configure. Open it, read it, carry it.</p>
+      <StoreButtons center class="mt-10" />
+    </div>
+  </section>
+</Base>
+
+<script>
+  import '../scripts/live-quote'
+</script>

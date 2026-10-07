@@ -1,0 +1,69 @@
+---
+import '../styles/global.css'
+import Footer from '../components/Footer.astro'
+import Header from '../components/Header.astro'
+import { site } from '../data/site'
+
+interface Props {
+  title?: string
+  description?: string
+  image?: string
+  noindex?: boolean
+}
+
+const { title, description = site.description, image = '/promo-image.png', noindex = false } = Astro.props
+const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.tagline}`
+const path = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '')
+const canonical = new URL(path || '/', site.url).toString()
+const ogImage = new URL(image, site.url).toString()
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#0b1016" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="apple-itunes-app" content={`app-id=${site.appStoreId}`} />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/icon-128.png" sizes="128x128" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="preconnect" href={site.api} crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="600" />
+    <meta property="og:image:height" content="600" />
+    <meta property="og:image:alt" content="A BeWise quote card over a misty forest photo" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <slot name="head" />
+  </head>
+  <body class="min-h-dvh bg-ink text-white">
+    <a
+      href="#main"
+      class="sr-only z-[100] rounded-full bg-white px-4 py-2 font-semibold text-ink focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+    >Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

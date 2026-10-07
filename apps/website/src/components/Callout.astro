@@ -1,0 +1,15 @@
+---
+interface Props {
+  title: string
+  class?: string
+}
+const { title, class: className = '' } = Astro.props
+---
+
+<aside class:list={['ring-brand relative overflow-hidden rounded-3xl bg-ink-2 p-7 sm:p-9', className]}>
+  <div aria-hidden="true" class="absolute -top-24 -right-24 size-64 rounded-full bg-aqua/15 blur-3xl"></div>
+  <h2 class="font-display relative text-2xl font-semibold">{title}</h2>
+  <div class="relative mt-3 text-white/70">
+    <slot />
+  </div>
+</aside>

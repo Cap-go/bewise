@@ -1,0 +1,55 @@
+{
+  "tabs": {
+    "today": "Today",
+    "archive": "Archive",
+    "explore": "Themes",
+    "settings": "Settings"
+  },
+  "today": {
+    "eyebrow": "Quote of the day",
+    "offline": "You're offline. Showing your last quote.",
+    "error": "Couldn't load today's quote.",
+    "retry": "Try again"
+  },
+  "quote": {
+    "share": "Share",
+    "copy": "Copy",
+    "copied": "Quote copied",
+    "love": "Love",
+    "loved": "Loved",
+    "shareText": "“{text}” — {author}\n\nDaily wisdom with BeWise: https://bewise.love"
+  },
+  "archive": {
+    "title": "Archive",
+    "subtitle": "Every past quote in {category}",
+    "empty": "No quotes yet.",
+    "end": "You reached the beginning."
+  },
+  "explore": {
+    "title": "Themes",
+    "subtitle": "Pick what you need to hear each morning.",
+    "current": "Current"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "reminder": "Daily reminder",
+    "reminderDesc": "A gentle nudge to read your quote.",
+    "reminderTime": "Time",
+    "notifTitle": "Your daily wisdom is here",
+    "notifBody": "Take 10 seconds for today's quote.",
+    "notifDenied": "Notifications are disabled in system settings.",
+    "shortcut": "iOS Shortcut",
+    "shortcutDesc": "Show your quote on the lock screen",
+    "apiKey": "Personal API key",
+    "apiKeyCopied": "API key copied",
+    "rate": "Rate BeWise",
+    "shareApp": "Tell a friend",
+    "shareAppText": "I read one wise quote every morning with BeWise: https://bewise.love",
+    "support": "Help & feedback",
+    "privacy": "Privacy policy",
+    "about": "About",
+    "version": "Version",
+    "madeBy": "Open source, built with Capacitor and shipped with Capgo live updates."
+  }
+}

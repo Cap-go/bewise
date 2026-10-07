@@ -1,0 +1,55 @@
+{
+  "tabs": {
+    "today": "Aujourd'hui",
+    "archive": "Archives",
+    "explore": "Thèmes",
+    "settings": "Réglages"
+  },
+  "today": {
+    "eyebrow": "Citation du jour",
+    "offline": "Hors ligne. Voici votre dernière citation.",
+    "error": "Impossible de charger la citation du jour.",
+    "retry": "Réessayer"
+  },
+  "quote": {
+    "share": "Partager",
+    "copy": "Copier",
+    "copied": "Citation copiée",
+    "love": "J'aime",
+    "loved": "Aimée",
+    "shareText": "« {text} » — {author}\n\nUne pensée par jour avec BeWise : https://bewise.love"
+  },
+  "archive": {
+    "title": "Archives",
+    "subtitle": "Toutes les citations passées · {category}",
+    "empty": "Aucune citation pour l'instant.",
+    "end": "Vous êtes arrivé au début."
+  },
+  "explore": {
+    "title": "Thèmes",
+    "subtitle": "Choisissez ce que vous avez besoin d'entendre chaque matin.",
+    "current": "Actuel"
+  },
+  "settings": {
+    "title": "Réglages",
+    "language": "Langue",
+    "reminder": "Rappel quotidien",
+    "reminderDesc": "Un petit rappel pour lire votre citation.",
+    "reminderTime": "Heure",
+    "notifTitle": "Votre sagesse du jour est arrivée",
+    "notifBody": "Prenez 10 secondes pour la citation du jour.",
+    "notifDenied": "Les notifications sont désactivées dans les réglages du système.",
+    "shortcut": "Raccourci iOS",
+    "shortcutDesc": "Votre citation sur l'écran verrouillé",
+    "apiKey": "Clé API personnelle",
+    "apiKeyCopied": "Clé API copiée",
+    "rate": "Noter BeWise",
+    "shareApp": "Recommander à un ami",
+    "shareAppText": "Je lis une citation inspirante chaque matin avec BeWise : https://bewise.love",
+    "support": "Aide et suggestions",
+    "privacy": "Confidentialité",
+    "about": "À propos",
+    "version": "Version",
+    "madeBy": "Open source, conçu avec Capacitor et mis à jour en direct avec Capgo."
+  }
+}

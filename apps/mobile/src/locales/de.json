@@ -1,0 +1,55 @@
+{
+  "tabs": {
+    "today": "Heute",
+    "archive": "Archiv",
+    "explore": "Themen",
+    "settings": "Einstellungen"
+  },
+  "today": {
+    "eyebrow": "Zitat des Tages",
+    "offline": "Offline. Hier ist dein letztes Zitat.",
+    "error": "Das heutige Zitat konnte nicht geladen werden.",
+    "retry": "Erneut versuchen"
+  },
+  "quote": {
+    "share": "Teilen",
+    "copy": "Kopieren",
+    "copied": "Zitat kopiert",
+    "love": "Gefällt mir",
+    "loved": "Gefällt dir",
+    "shareText": "„{text}“ — {author}\n\nTägliche Weisheit mit BeWise: https://bewise.love"
+  },
+  "archive": {
+    "title": "Archiv",
+    "subtitle": "Alle bisherigen Zitate · {category}",
+    "empty": "Noch keine Zitate.",
+    "end": "Du bist am Anfang angekommen."
+  },
+  "explore": {
+    "title": "Themen",
+    "subtitle": "Wähle, was du jeden Morgen hören möchtest.",
+    "current": "Aktuell"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "reminder": "Tägliche Erinnerung",
+    "reminderDesc": "Ein sanfter Hinweis, dein Zitat zu lesen.",
+    "reminderTime": "Uhrzeit",
+    "notifTitle": "Deine tägliche Weisheit ist da",
+    "notifBody": "Nimm dir 10 Sekunden für das heutige Zitat.",
+    "notifDenied": "Mitteilungen sind in den Systemeinstellungen deaktiviert.",
+    "shortcut": "iOS-Kurzbefehl",
+    "shortcutDesc": "Dein Zitat auf dem Sperrbildschirm",
+    "apiKey": "Persönlicher API-Schlüssel",
+    "apiKeyCopied": "API-Schlüssel kopiert",
+    "rate": "BeWise bewerten",
+    "shareApp": "Einem Freund empfehlen",
+    "shareAppText": "Ich lese jeden Morgen ein weises Zitat mit BeWise: https://bewise.love",
+    "support": "Hilfe & Feedback",
+    "privacy": "Datenschutz",
+    "about": "Über",
+    "version": "Version",
+    "madeBy": "Open Source, gebaut mit Capacitor, live aktualisiert mit Capgo."
+  }
+}

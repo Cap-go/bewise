@@ -1,0 +1,55 @@
+{
+  "tabs": {
+    "today": "Oggi",
+    "archive": "Archivio",
+    "explore": "Temi",
+    "settings": "Impostazioni"
+  },
+  "today": {
+    "eyebrow": "Citazione del giorno",
+    "offline": "Sei offline. Ecco la tua ultima citazione.",
+    "error": "Impossibile caricare la citazione di oggi.",
+    "retry": "Riprova"
+  },
+  "quote": {
+    "share": "Condividi",
+    "copy": "Copia",
+    "copied": "Citazione copiata",
+    "love": "Mi piace",
+    "loved": "Ti piace",
+    "shareText": "«{text}» — {author}\n\nSaggezza quotidiana con BeWise: https://bewise.love"
+  },
+  "archive": {
+    "title": "Archivio",
+    "subtitle": "Tutte le citazioni passate · {category}",
+    "empty": "Ancora nessuna citazione.",
+    "end": "Sei arrivato all'inizio."
+  },
+  "explore": {
+    "title": "Temi",
+    "subtitle": "Scegli cosa hai bisogno di sentire ogni mattina.",
+    "current": "Attuale"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "language": "Lingua",
+    "reminder": "Promemoria giornaliero",
+    "reminderDesc": "Un piccolo promemoria per leggere la tua citazione.",
+    "reminderTime": "Orario",
+    "notifTitle": "La tua saggezza quotidiana è qui",
+    "notifBody": "Prenditi 10 secondi per la citazione di oggi.",
+    "notifDenied": "Le notifiche sono disattivate nelle impostazioni di sistema.",
+    "shortcut": "Comando rapido iOS",
+    "shortcutDesc": "La tua citazione nella schermata di blocco",
+    "apiKey": "Chiave API personale",
+    "apiKeyCopied": "Chiave API copiata",
+    "rate": "Valuta BeWise",
+    "shareApp": "Consiglia a un amico",
+    "shareAppText": "Leggo una citazione saggia ogni mattina con BeWise: https://bewise.love",
+    "support": "Aiuto e feedback",
+    "privacy": "Privacy",
+    "about": "Informazioni",
+    "version": "Versione",
+    "madeBy": "Open source, creato con Capacitor e aggiornato in tempo reale con Capgo."
+  }
+}

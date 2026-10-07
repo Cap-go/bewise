@@ -1,0 +1,39 @@
+---
+import { themes } from '../../data/site'
+import StatusBar from './StatusBar.astro'
+import TabBar from './TabBar.astro'
+
+const gradients = [
+  'from-[#1fa2ff] to-[#00d9f2]',
+  'from-[#0f2a44] to-[#1fa2ff]',
+  'from-[#00b37e] to-[#a6ffcb]',
+  'from-[#ff5f8f] to-[#ffb199]',
+  'from-[#00d9f2] to-[#a6ffcb]',
+  'from-[#ffb347] to-[#ff5f8f]',
+  'from-[#ff5f8f] to-[#c471f5]',
+  'from-[#7f7fd5] to-[#86a8e7]',
+  'from-[#1fa2ff] to-[#a6ffcb]',
+  'from-[#0b1016] to-[#00c0ff]',
+]
+---
+
+<div class="relative h-full w-full overflow-hidden bg-ink">
+  <StatusBar />
+  <div class="px-[6cqw] pt-[19cqw]">
+    <p class="font-serif text-[9cqw] font-semibold tracking-tight">Themes</p>
+    <p class="mt-[1cqw] text-[3.3cqw] text-white/60">Pick what you need to hear each morning.</p>
+    <ul class="mt-[5cqw] grid grid-cols-2 gap-[3cqw]">
+      {
+        themes.slice(0, 10).map((name, i) => (
+          <li class:list={['relative flex aspect-[4/3] items-end overflow-hidden rounded-[4.5cqw] bg-gradient-to-br p-[3.5cqw]', gradients[i]]}>
+            <span class="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+            <span class="relative text-[3.8cqw] font-semibold">{name}</span>
+            {i === 0 && <span class="absolute top-[2.6cqw] right-[2.6cqw] rounded-full bg-white px-[2.2cqw] py-[0.8cqw] text-[2.4cqw] font-semibold text-ink">Current</span>}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 h-[40cqw] bg-gradient-to-t from-ink to-transparent"></div>
+  <TabBar active="themes" />
+</div>

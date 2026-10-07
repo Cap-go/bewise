@@ -1,0 +1,21 @@
+{
+  "name": "bewise",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "bun --cwd apps/mobile dev",
+    "build": "bun --cwd apps/mobile build && bun --cwd apps/website build",
+    "typecheck": "bun --cwd apps/api typecheck && bun --cwd apps/mobile typecheck",
+    "test": "bun --cwd apps/api test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "latest",
+    "eslint": "latest",
+    "typescript": "^5.9.3"
+  }
+}

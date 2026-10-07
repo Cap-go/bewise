@@ -1,0 +1,26 @@
+{
+  "name": "@bewise/website",
+  "type": "module",
+  "version": "1.4.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "deploy": "wrangler deploy",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "latest",
+    "@astrojs/sitemap": "latest",
+    "@fontsource-variable/fraunces": "latest",
+    "@fontsource-variable/inter": "latest",
+    "@tailwindcss/vite": "latest",
+    "astro": "latest",
+    "tailwindcss": "latest",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "wrangler": "latest"
+  }
+}

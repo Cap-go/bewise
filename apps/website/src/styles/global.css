@@ -1,0 +1,296 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/fraunces/wght-italic.css';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --color-ink: #0b1016;
+  --color-ink-2: #121a23;
+  --color-ink-3: #1b2531;
+  --color-line: rgb(255 255 255 / 0.09);
+  --color-sky: #00c0ff;
+  --color-blue: #1fa2ff;
+  --color-aqua: #00d9f2;
+  --color-mint: #a6ffcb;
+  --color-rose: #ff5f8f;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    scroll-padding-top: 5.5rem;
+  }
+
+  html {
+    background: var(--color-ink);
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  ::selection {
+    background: rgb(0 217 242 / 0.35);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-aqua);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+@utility text-gradient {
+  background: linear-gradient(100deg, var(--color-blue), var(--color-aqua) 50%, var(--color-mint));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-brand {
+  background: linear-gradient(120deg, var(--color-blue), var(--color-aqua) 52%, var(--color-mint));
+}
+
+@utility glass {
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+}
+
+@utility font-display {
+  font-family: var(--font-serif);
+  letter-spacing: -0.025em;
+}
+
+/* Fine noise to keep the large gradients from banding. */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Gradient hairline border for highlighted cards. */
+.ring-brand {
+  position: relative;
+  isolation: isolate;
+}
+
+.ring-brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgb(31 162 255 / 0.7), rgb(0 217 242 / 0.25) 40%, rgb(166 255 203 / 0.6));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Entrance animation: progressive enhancement only. */
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 0.9s var(--ease-out-soft) both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  .float {
+    animation: float 7s ease-in-out infinite;
+  }
+
+  .kenburns {
+    animation: kenburns 24s ease-in-out infinite alternate;
+  }
+
+  .marquee {
+    animation: marquee 40s linear infinite;
+  }
+
+  .marquee-wrap:hover .marquee {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1.14) translate(-1.5%, -1%);
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Long-form pages (privacy, support, shortcut). */
+.prose {
+  color: rgb(255 255 255 / 0.78);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.prose > * + * {
+  margin-top: 1.1em;
+}
+
+.prose h2 {
+  margin-top: 2.6em;
+  font-family: var(--font-serif);
+  font-size: 1.65rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: #fff;
+}
+
+.prose h3 {
+  margin-top: 2em;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.prose h2 + *,
+.prose h3 + * {
+  margin-top: 0.6em;
+}
+
+.prose a {
+  color: var(--color-aqua);
+  text-decoration: underline;
+  text-decoration-color: rgb(0 217 242 / 0.4);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s;
+}
+
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
+.prose strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.3em;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li + li {
+  margin-top: 0.45em;
+}
+
+.prose li::marker {
+  color: var(--color-aqua);
+}
+
+.prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.88em;
+  padding: 0.15em 0.4em;
+  border-radius: 0.4rem;
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  color: #fff;
+  word-break: break-word;
+}
+
+.prose pre {
+  overflow-x: auto;
+  padding: 1.1rem 1.25rem;
+  border-radius: 1rem;
+  background: var(--color-ink-2);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.prose pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+  word-break: normal;
+}
+
+.prose hr {
+  margin: 2.5em 0;
+  border-color: rgb(255 255 255 / 0.08);
+}
+
+/* Scale long quotes down so they always fit their frame. */
+.quote-fit[data-length='medium'] {
+  font-size: 6cqw;
+}
+
+.quote-fit[data-length='long'] {
+  font-size: 5.2cqw;
+}
+
+.quote-fit[data-length='xl'] {
+  font-size: 4.5cqw;
+}
+
+[data-size='card'][data-length='long'] {
+  font-size: clamp(1.5rem, 3.6vw, 2.6rem);
+}
+
+[data-size='card'][data-length='xl'] {
+  font-size: clamp(1.3rem, 3vw, 2.15rem);
+}

@@ -1,0 +1,70 @@
+---
+import { fallbackQuotes, sized } from '../../data/site'
+import QuoteMark from '../QuoteMark.astro'
+import StatusBar from './StatusBar.astro'
+import TabBar from './TabBar.astro'
+
+interface Props {
+  /** Connect to the live quote script. */
+  live?: boolean
+  eager?: boolean
+}
+const { live = false, eager = false } = Astro.props
+const q = fallbackQuotes.inspire!
+---
+
+<div class="relative h-full w-full overflow-hidden bg-ink">
+  <div class="bg-brand absolute inset-0 opacity-90"></div>
+  <img
+    src={sized(q.img, 700)}
+    alt=""
+    width="700"
+    height="1520"
+    loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : 'auto'}
+    decoding="async"
+    class="kenburns absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+    data-live-img={live ? '700' : undefined}
+  />
+  <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/85"></div>
+  <StatusBar />
+  <div class="relative flex h-full flex-col px-[7cqw] pt-[17cqw] pb-[30cqw]">
+    <div class="flex items-center justify-between gap-[3cqw]">
+      <div>
+        <p class="text-[2.6cqw] font-semibold tracking-[0.18em] text-white/75 uppercase">Quote of the day</p>
+        <p class="mt-[1cqw] text-[3.6cqw] font-medium text-white" data-live-date={live ? '' : undefined}>Today</p>
+      </div>
+      <span class="rounded-full border border-white/25 bg-white/10 px-[3.4cqw] py-[1.4cqw] text-[2.9cqw] font-semibold backdrop-blur-md" data-live-category={live ? '' : undefined}>
+        Inspiration
+      </span>
+    </div>
+    <div class="flex flex-1 flex-col justify-end pb-[6cqw]">
+      <QuoteMark class="h-[7cqw] w-auto self-start text-aqua" />
+      <p
+        class="quote-fit mt-[4cqw] font-serif text-[6.6cqw] leading-[1.22] font-medium tracking-[-0.01em] text-balance text-white drop-shadow-[0_2px_18px_rgb(0_0_0/0.35)]"
+        data-live-text={live ? '' : undefined}
+      >
+        {q.text}
+      </p>
+      <p class="mt-[5cqw] flex items-center gap-[2.6cqw] text-[3.6cqw] font-medium text-white/85">
+        <span class="h-px w-[7cqw] bg-mint/80"></span>
+        <span data-live-author={live ? '' : undefined}>{q.author}</span>
+      </p>
+    </div>
+    <div class="flex items-center gap-[2.6cqw]" aria-hidden="true">
+      <span class="flex h-[12cqw] items-center gap-[2cqw] rounded-full border border-white/20 bg-white/[0.12] pr-[4.2cqw] pl-[3.4cqw] backdrop-blur-xl">
+        <svg viewBox="0 0 24 24" class="size-[5.6cqw] fill-rose text-rose" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
+        <span class="text-[3.6cqw] font-semibold tabular-nums" data-live-votes={live ? '' : undefined}>{live ? 'Love' : '128'}</span>
+      </span>
+      <span class="flex-1"></span>
+      <span class="grid size-[12cqw] place-items-center rounded-full border border-white/20 bg-white/[0.12] backdrop-blur-xl">
+        <svg viewBox="0 0 24 24" class="size-[5cqw]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+      </span>
+      <span class="flex h-[12cqw] items-center gap-[1.6cqw] rounded-full bg-white px-[5cqw] text-[3.6cqw] font-semibold text-ink">
+        <svg viewBox="0 0 24 24" class="size-[4.4cqw]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" x2="12" y1="2" y2="15" /></svg>
+        Share
+      </span>
+    </div>
+  </div>
+  <TabBar active="today" />
+</div>

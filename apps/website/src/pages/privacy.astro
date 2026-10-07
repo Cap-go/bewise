@@ -1,0 +1,144 @@
+---
+import Callout from '../components/Callout.astro'
+import { site } from '../data/site'
+import Page from '../layouts/Page.astro'
+
+const summary = [
+  { title: 'No account', text: 'You never sign up, log in or give us your name, email or phone number.' },
+  { title: 'No ads', text: 'BeWise shows no advertising and never sells or rents data to anyone.' },
+  { title: 'No trackers', text: 'No analytics, attribution or advertising SDKs in the app or on this site.' },
+  { title: 'EU hosting', text: 'Our small amount of data lives on Cloudflare, stored in the EU.' },
+]
+---
+
+<Page
+  title="Privacy policy"
+  description="BeWise has no accounts, no ads and no tracking SDKs. Here is exactly what the app stores, where, and how to delete it."
+  eyebrow="Privacy"
+  heading="Privacy, in plain words."
+  lead="BeWise is built to collect as little as possible. This policy explains exactly what the app stores, why, and how you can have it deleted."
+  meta="Last updated: October 2026"
+>
+  <ul class="grid gap-3 sm:grid-cols-2">
+    {
+      summary.map(item => (
+        <li class="rounded-2xl border border-white/[0.08] bg-ink-2 p-5">
+          <p class="flex items-center gap-2 font-semibold">
+            <svg viewBox="0 0 24 24" class="size-5 text-mint" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7" /></svg>
+            {item.title}
+          </p>
+          <p class="mt-1.5 text-sm leading-relaxed text-white/65">{item.text}</p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="prose mt-4">
+    <h2>Who we are</h2>
+    <p>
+      BeWise (the iOS and Android app and the website <a href="https://bewise.love">bewise.love</a>) is operated by
+      <strong>{site.company}</strong>, a company registered in Estonia and the team behind Capgo. {site.company} is the data controller for the
+      information described below. You can reach us at any time at <a href={`mailto:${site.email}`}>{site.email}</a>.
+    </p>
+
+    <h2>What the app stores</h2>
+    <h3>An anonymous device ID</h3>
+    <p>
+      The first time you open BeWise, the app generates a random identifier on your device (a UUID such as
+      <code>3f2a9c1e-…</code>). It is not derived from your hardware, your Apple or Google account, or any advertising identifier,
+      and it is not linked to your name, email or contacts. It is stored on your device and sent to our API so we can:
+    </p>
+    <ul>
+      <li>remember which quotes you have loved, so the count is accurate and you can only vote once per quote;</li>
+      <li>remember your preferences: your theme, your language, your platform (iOS or Android) and the app version you run;</li>
+      <li>serve the right quote to your <a href="/shortcut">iOS Shortcut</a>, where this same ID acts as your personal API key.</li>
+    </ul>
+
+    <h3>Data stored only on your device</h3>
+    <p>
+      Your reminder time, cached quotes and other settings stay in the app’s local storage on your phone. Daily reminders are
+      <strong>local notifications scheduled by your device</strong>. We do not use push notification services and never receive
+      a push token.
+    </p>
+
+    <h3>What we never collect</h3>
+    <ul>
+      <li>No name, email address, phone number or account of any kind.</li>
+      <li>No location, contacts, photos, camera or microphone access.</li>
+      <li>No advertising identifiers (IDFA or Android Advertising ID).</li>
+      <li>No analytics, crash-reporting, attribution or advertising SDKs.</li>
+      <li>No cross-app or cross-site tracking, and no data sold or shared for advertising.</li>
+    </ul>
+
+    <h2>Where the data lives</h2>
+    <p>
+      The BeWise API runs on <strong>Cloudflare Workers</strong>, and the data above is stored in a <strong>Cloudflare D1</strong> database located
+      in the European Union. Cloudflare acts as our processor. To deliver and protect the service, Cloudflare processes technical request data such
+      as IP addresses; we do not store IP addresses alongside your device ID, and short-lived operational logs are deleted automatically within days.
+    </p>
+
+    <h2>Other services the app talks to</h2>
+    <ul>
+      <li>
+        <strong>Unsplash</strong> serves the background photographs. Your device downloads images directly from
+        <code>images.unsplash.com</code>, which means Unsplash receives a standard web request (including your IP address). See the
+        <a href="https://unsplash.com/privacy">Unsplash privacy policy</a>.
+      </li>
+      <li>
+        <strong>Capgo live updates</strong>, operated by {site.company}, deliver app updates without a store release. To check for an update, the app
+        sends its app ID, current version, platform, OS version and a random installation ID created by the update plugin. This is used only to
+        deliver the right update and to measure update success.
+      </li>
+      <li>
+        <strong>Apple and Google</strong> provide the App Store, Google Play, the system share sheet and the native “rate this app” prompt.
+        Those interactions are covered by their own privacy policies; we receive no personal data from them.
+      </li>
+    </ul>
+
+    <h2>This website</h2>
+    <p>
+      bewise.love uses no cookies, no analytics and no third-party scripts. The home page fetches today’s quote from
+      <code>api.bewise.love</code> and loads photos from Unsplash. The site is served by Cloudflare.
+    </p>
+
+    <h2>Why we process it</h2>
+    <p>
+      We process the anonymous device ID and your preferences on the basis of our legitimate interest in running the app you chose to use
+      (Article 6(1)(f) GDPR): counting votes fairly, remembering your settings and powering your Shortcut. We keep this data for as long as you use
+      the app, or until you ask us to delete it.
+    </p>
+
+    <h2>Your rights and deleting your data</h2>
+    <p>
+      Because we cannot identify you, the simplest way to remove your data is to <strong>delete the app</strong>: the ID and all local data are
+      erased from your device. To also erase the server-side record, email <a href={`mailto:${site.email}?subject=BeWise%20data%20deletion`}>{site.email}</a>
+      with the personal API key shown in <strong>Settings → Personal API key</strong>. We will delete the record, your preferences and your votes within
+      30 days and confirm by email.
+    </p>
+    <p>
+      Under the GDPR you have the right to access, rectify, erase, restrict or object to the processing of your data, and to data portability. You also
+      have the right to lodge a complaint with a supervisory authority, such as the Estonian Data Protection Inspectorate
+      (<a href="https://www.aki.ee/en">Andmekaitse Inspektsioon</a>) or the authority in your country.
+    </p>
+
+    <h2>Children</h2>
+    <p>
+      BeWise is suitable for all ages and does not knowingly collect personal data from anyone. Since the app requires no account and collects no
+      identifying information, it can be used safely by students and younger readers.
+    </p>
+
+    <h2>Changes to this policy</h2>
+    <p>
+      If we change how BeWise handles data, we will update this page and the date at the top. The full history of this page is public in our
+      <a href={site.github}>GitHub repository</a>.
+    </p>
+  </div>
+
+  <Callout title="Questions?" class="mt-14">
+    <p>
+      Write to <a href={`mailto:${site.email}`} class="font-semibold text-white underline decoration-aqua/50 underline-offset-4">{site.email}</a>.
+      A human reads every message. You can also read the full source code of the app and API on
+      <a href={site.github} class="font-semibold text-white underline decoration-aqua/50 underline-offset-4">GitHub</a>.
+    </p>
+  </Callout>
+</Page>

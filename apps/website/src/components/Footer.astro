@@ -1,0 +1,67 @@
+---
+import { site } from '../data/site'
+import Logo from './Logo.astro'
+
+const year = new Date().getFullYear()
+const columns = [
+  {
+    title: 'App',
+    links: [
+      { href: site.appStore, label: 'App Store' },
+      { href: site.googlePlay, label: 'Google Play' },
+      { href: '/shortcut', label: 'iOS Shortcut' },
+      { href: '/#features', label: 'Features' },
+    ],
+  },
+  {
+    title: 'Help',
+    links: [
+      { href: '/support', label: 'Support & FAQ' },
+      { href: '/privacy', label: 'Privacy policy' },
+      { href: `mailto:${site.email}`, label: site.email },
+    ],
+  },
+  {
+    title: 'Open source',
+    links: [
+      { href: site.github, label: 'GitHub repository' },
+      { href: site.capgo, label: 'Capgo live updates' },
+      { href: 'https://capacitorjs.com', label: 'Capacitor' },
+    ],
+  },
+]
+---
+
+<footer class="relative border-t border-white/[0.06] bg-ink">
+  <div class="mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:px-8 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+    <div class="max-w-xs">
+      <Logo />
+      <p class="mt-4 text-sm leading-relaxed text-white/60">
+        One beautiful quote, every day. Free, no account, no ads. An open-source showcase by
+        <a href={site.capgo} class="text-white/80 underline decoration-white/20 underline-offset-4 hover:text-white">Capgo</a>.
+      </p>
+    </div>
+    {
+      columns.map(col => (
+        <div>
+          <h2 class="text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">{col.title}</h2>
+          <ul class="mt-4 space-y-2.5 text-sm">
+            {col.links.map(link => (
+              <li>
+                <a href={link.href} class="text-white/70 transition-colors hover:text-white">
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+  <div class="border-t border-white/[0.06]">
+    <div class="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-6 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <p>© 2019–{year} {site.company}. All rights reserved.</p>
+      <p>Photos from <a href="https://unsplash.com" class="underline decoration-white/20 underline-offset-4 hover:text-white">Unsplash</a>.</p>
+    </div>
+  </div>
+</footer>

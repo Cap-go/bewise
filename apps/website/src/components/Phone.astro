@@ -1,0 +1,49 @@
+---
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+
+interface Props {
+  /** Path inside `public/`, e.g. `/screenshots/today.png`. Used when the file exists at build time. */
+  screenshot?: string
+  alt: string
+  class?: string
+  eager?: boolean
+}
+
+const { screenshot, alt, class: className = '', eager = false } = Astro.props
+const hasShot = !!screenshot && existsSync(join(process.cwd(), 'public', screenshot))
+---
+
+<div class:list={['w-full [container-type:inline-size]', className]}>
+<figure
+  class="relative m-0 aspect-[1320/2868] w-full rounded-[13.5cqw] bg-[#05080c] p-[2.6cqw] shadow-[0_50px_90px_-30px_rgb(0_0_0/0.95),0_0_0_1px_rgb(255_255_255/0.14),inset_0_0_0_1.5px_rgb(255_255_255/0.06)]"
+>
+  <div class="relative h-full w-full overflow-hidden rounded-[11cqw] bg-ink [transform:translateZ(0)]">
+    {
+      hasShot
+        ? (
+            <img
+              src={screenshot}
+              alt={alt}
+              width="1320"
+              height="2868"
+              loading={eager ? 'eager' : 'lazy'}
+              decoding="async"
+              class="h-full w-full object-cover"
+            />
+          )
+        : (
+            <div role="img" aria-label={alt} class="h-full w-full">
+              <slot />
+            </div>
+          )
+    }
+    <!-- Dynamic Island -->
+    <span aria-hidden="true" class="absolute top-[3.4cqw] left-1/2 z-20 h-[8cqw] w-[28cqw] -translate-x-1/2 rounded-full bg-black"></span>
+  </div>
+  <!-- Side buttons -->
+  <span aria-hidden="true" class="absolute top-[22%] -left-[0.9cqw] h-[7%] w-[1cqw] rounded-l bg-[#1a222c]"></span>
+  <span aria-hidden="true" class="absolute top-[31%] -left-[0.9cqw] h-[11%] w-[1cqw] rounded-l bg-[#1a222c]"></span>
+  <span aria-hidden="true" class="absolute top-[28%] -right-[0.9cqw] h-[15%] w-[1cqw] rounded-r bg-[#1a222c]"></span>
+</figure>
+</div>

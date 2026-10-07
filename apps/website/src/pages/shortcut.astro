@@ -1,0 +1,114 @@
+---
+import Callout from '../components/Callout.astro'
+import { site } from '../data/site'
+import Page from '../layouts/Page.astro'
+
+const steps = [
+  {
+    title: 'Copy your personal API key',
+    body: 'Open BeWise, go to <strong>Settings</strong> and tap <strong>Personal API key</strong>. It is copied to your clipboard. Open the app once while online so your key and preferences are saved.',
+  },
+  {
+    title: 'Create a new Shortcut',
+    body: 'Open the <strong>Shortcuts</strong> app, tap <strong>+</strong>, and add the action <strong>Get Contents of URL</strong>. Paste the endpoint above and replace <code>{key}</code> with your key.',
+  },
+  {
+    title: 'Pick out the quote',
+    body: 'Add <strong>Get Dictionary Value</strong> twice: one for the key <code>text</code>, one for <code>author</code>. Shortcuts reads the JSON response automatically.',
+  },
+  {
+    title: 'Show it',
+    body: 'Add <strong>Show Notification</strong> (or <strong>Show Result</strong>, or <strong>Speak Text</strong> for Siri) with the text, a dash and the author. Name the Shortcut “BeWise”.',
+  },
+  {
+    title: 'Put it on your lock screen',
+    body: 'In the <strong>Automation</strong> tab, create a <strong>Time of Day</strong> automation, set it to run daily at your chosen time, choose <strong>Run Immediately</strong>, and select your BeWise Shortcut. Each morning, the quote lands on your lock screen as a notification.',
+  },
+]
+
+const response = `{
+  "id": "…",
+  "category": "inspire",
+  "lang": "en",
+  "date": "2026-10-07",
+  "text": "Act as if what you do makes a difference. It does.",
+  "author": "William James",
+  "img": "https://images.unsplash.com/photo-…",
+  "tags": ["action"],
+  "votes": 128,
+  "voted": false
+}`
+---
+
+<Page
+  title="iOS Shortcut"
+  description="Get your BeWise quote of the day on the iPhone lock screen, in Siri or in a widget with an iOS Shortcut and your personal API key."
+  eyebrow="iOS Shortcut"
+  heading="Your daily quote, on the lock screen."
+  lead="BeWise gives every device a personal API key. Plug it into an iOS Shortcut and today’s quote, in your theme and language, can appear on your lock screen, in Siri or in a widget."
+>
+  <div class="ring-brand relative overflow-hidden rounded-3xl bg-ink-2 p-6 sm:p-8">
+    <p class="text-xs font-semibold tracking-[0.16em] text-white/55 uppercase">Endpoint</p>
+    <p class="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-2 font-mono text-[0.92rem] break-all sm:text-base">
+      <span class="rounded-md bg-mint/15 px-2 py-0.5 text-xs font-bold tracking-wider text-mint">GET</span>
+      <span class="text-white">{site.api}/v1/users/<span class="text-aqua">&#123;key&#125;</span>/today</span>
+    </p>
+    <p class="mt-4 text-sm leading-relaxed text-white/60">
+      Replace <code class="rounded bg-white/[0.07] px-1.5 py-0.5 text-white">&#123;key&#125;</code> with the personal API key from Settings. No headers, no
+      authentication, JSON response.
+    </p>
+  </div>
+
+  <ol class="mt-14 space-y-8">
+    {
+      steps.map((step, i) => (
+        <li class="grid grid-cols-[auto_1fr] gap-5">
+          <span class="bg-brand grid size-10 place-items-center rounded-full font-semibold text-ink tabular-nums" aria-hidden="true">
+            {i + 1}
+          </span>
+          <div class="pt-1.5">
+            <h2 class="text-lg font-semibold">{step.title}</h2>
+            <p class="prose mt-1.5 text-base" set:html={step.body} />
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="prose mt-16">
+    <h2>What you get back</h2>
+    <p>The endpoint answers with today’s quote for your theme and language:</p>
+    <pre><code>{response}</code></pre>
+    <ul>
+      <li><code>text</code> and <code>author</code> are all you need for a notification.</li>
+      <li><code>img</code> is the photo behind the quote. Use <strong>Get Contents of URL</strong> on it to show the image too.</li>
+      <li>Changing the theme or language in the app changes what your Shortcut receives. No need to edit the Shortcut.</li>
+      <li>
+        Add <code>?date=YYYY-MM-DD</code> to fetch yesterday’s or tomorrow’s quote (one day either side of today, UTC). Handy when your local date differs from
+        UTC.
+      </li>
+    </ul>
+
+    <h2>Troubleshooting</h2>
+    <ul>
+      <li><strong>“user not found”</strong>: open BeWise once with an internet connection so your key is registered, then try again.</li>
+      <li><strong>“invalid id”</strong>: the key was pasted incompletely. Copy it again from Settings.</li>
+      <li>Don’t share your key publicly. It only reveals your theme and language, but it is yours.</li>
+    </ul>
+
+    <h2>For developers</h2>
+    <p>
+      There is also a public endpoint that needs no key:
+      <code>GET {site.api}/v1/quotes/today?category=inspire&amp;lang=en</code>. It is CORS-enabled, so you can call it from any web page. The API is
+      open source in the <a href={site.github}>BeWise repository</a>.
+    </p>
+  </div>
+
+  <Callout title="Need a hand?" class="mt-14">
+    <p>
+      Check the <a href="/support" class="font-semibold text-white underline decoration-aqua/50 underline-offset-4">FAQ</a> or email
+      <a href={`mailto:${site.email}?subject=BeWise%20Shortcut`} class="font-semibold text-white underline decoration-aqua/50 underline-offset-4">{site.email}</a>.
+    </p>
+  </Callout>
+</Page>
+

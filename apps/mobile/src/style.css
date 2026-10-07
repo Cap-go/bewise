@@ -1,0 +1,105 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/fraunces';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --color-ink: #0b1016;
+  --color-ink-2: #121a23;
+  --color-ink-3: #1b2531;
+  --color-sky: #00c0ff;
+  --color-aqua: #00d9f2;
+  --color-mint: #a6ffcb;
+  --color-rose: #ff5f8f;
+}
+
+:root {
+  /* The native plugin reports 0 for hidden bars; never go under the status bar / home indicator. */
+  --nav-top: max(var(--cap-native-navigation-top, 0px), env(safe-area-inset-top));
+  --nav-bottom: max(var(--cap-native-navigation-bottom, 0px), env(safe-area-inset-bottom));
+  color-scheme: dark;
+}
+
+/* Browser preview: leave room for the web tab bar. */
+html.web-chrome {
+  --nav-bottom: calc(env(safe-area-inset-bottom) + 84px);
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  background: var(--color-ink);
+  color: white;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-sans);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+cap-router-outlet,
+cap-page {
+  display: block;
+  height: 100%;
+}
+
+cap-page {
+  background: var(--color-ink);
+}
+
+.page-scroll {
+  padding-top: calc(var(--nav-top) + 8px);
+  padding-bottom: calc(var(--nav-bottom) + 24px);
+}
+
+.brand-gradient {
+  background-image: linear-gradient(135deg, #1fa2ff 0%, #00d9f2 55%, #a6ffcb 100%);
+}
+
+.text-gradient {
+  background-image: linear-gradient(120deg, #6fd6ff 0%, #a6ffcb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pressable {
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.pressable:active {
+  transform: scale(0.96);
+  opacity: 0.85;
+}
+
+@keyframes kenburns {
+  from { transform: scale(1.04) translate3d(0, 0, 0); }
+  to { transform: scale(1.14) translate3d(-1.5%, -1.5%, 0); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+.animate-kenburns {
+  animation: kenburns 24s ease-out both alternate infinite;
+}
+
+.animate-rise {
+  animation: rise 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-kenburns,
+  .animate-rise {
+    animation: none;
+  }
+}

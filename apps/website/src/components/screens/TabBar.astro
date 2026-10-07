@@ -1,0 +1,34 @@
+---
+interface Props {
+  active: 'today' | 'archive' | 'themes' | 'settings'
+}
+const { active } = Astro.props
+const tabs = [
+  { id: 'today', label: 'Today', d: 'M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z' },
+  { id: 'archive', label: 'Archive', d: 'M4 5h16v4H4zM5 9v10h14V9M10 13h4' },
+  { id: 'themes', label: 'Themes', d: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
+  { id: 'settings', label: 'Settings', d: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z' },
+]
+---
+
+<div aria-hidden="true" class="absolute inset-x-[5cqw] bottom-[6cqw] z-10">
+  <div
+    class="flex items-center justify-between rounded-full border border-white/25 bg-white/[0.14] p-[1.4cqw] shadow-[0_10px_30px_-10px_rgb(0_0_0/0.6),inset_0_1px_0_rgb(255_255_255/0.35)] backdrop-blur-xl backdrop-saturate-150"
+  >
+    {
+      tabs.map(tab => (
+        <span
+          class:list={[
+            'flex flex-1 flex-col items-center gap-[0.8cqw] rounded-full py-[1.8cqw] text-[2.6cqw] font-semibold',
+            tab.id === active ? 'bg-white/20 text-white' : 'text-white/75',
+          ]}
+        >
+          <svg viewBox="0 0 24 24" class="size-[5.6cqw]" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d={tab.d} />
+          </svg>
+          {tab.label}
+        </span>
+      ))
+    }
+  </div>
+</div>

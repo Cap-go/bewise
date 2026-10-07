@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BeWise</string>
+    <string name="title_activity_main">BeWise</string>
+    <string name="package_name">ee.forgr.bewise</string>
+    <string name="custom_url_scheme">ee.forgr.bewise</string>
+</resources>

@@ -1,0 +1,32 @@
+---
+import Base from './Base.astro'
+
+interface Props {
+  title: string
+  description: string
+  eyebrow: string
+  heading?: string
+  lead?: string
+  meta?: string
+}
+
+const { title, description, eyebrow, heading = title, lead, meta } = Astro.props
+---
+
+<Base title={title} description={description}>
+  <section class="grain relative isolate overflow-hidden border-b border-white/[0.06]">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+      <div class="absolute -top-48 left-1/2 size-[40rem] -translate-x-1/2 rounded-full bg-blue/20 blur-[120px]"></div>
+      <div class="absolute -right-40 -bottom-40 size-[28rem] rounded-full bg-mint/10 blur-[120px]"></div>
+    </div>
+    <div class="mx-auto max-w-3xl px-5 pt-16 pb-14 sm:px-8 md:pt-24 md:pb-20">
+      <p class="rise text-sm font-semibold tracking-[0.16em] text-aqua uppercase">{eyebrow}</p>
+      <h1 class="rise font-display mt-4 text-[2.6rem] leading-[1.05] font-semibold text-balance sm:text-6xl" style="--d:60ms">{heading}</h1>
+      {lead && <p class="rise mt-6 max-w-2xl text-lg leading-relaxed text-pretty text-white/70" style="--d:120ms">{lead}</p>}
+      {meta && <p class="rise mt-6 text-sm text-white/50" style="--d:160ms">{meta}</p>}
+    </div>
+  </section>
+  <div class="mx-auto max-w-3xl px-5 py-14 sm:px-8 md:py-20">
+    <slot />
+  </div>
+</Base>

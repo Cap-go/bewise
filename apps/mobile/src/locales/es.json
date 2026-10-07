@@ -1,0 +1,55 @@
+{
+  "tabs": {
+    "today": "Hoy",
+    "archive": "Archivo",
+    "explore": "Temas",
+    "settings": "Ajustes"
+  },
+  "today": {
+    "eyebrow": "Frase del día",
+    "offline": "Sin conexión. Mostrando tu última frase.",
+    "error": "No se pudo cargar la frase de hoy.",
+    "retry": "Reintentar"
+  },
+  "quote": {
+    "share": "Compartir",
+    "copy": "Copiar",
+    "copied": "Frase copiada",
+    "love": "Me gusta",
+    "loved": "Te gusta",
+    "shareText": "«{text}» — {author}\n\nSabiduría diaria con BeWise: https://bewise.love"
+  },
+  "archive": {
+    "title": "Archivo",
+    "subtitle": "Todas las frases pasadas · {category}",
+    "empty": "Aún no hay frases.",
+    "end": "Has llegado al principio."
+  },
+  "explore": {
+    "title": "Temas",
+    "subtitle": "Elige lo que necesitas escuchar cada mañana.",
+    "current": "Actual"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma",
+    "reminder": "Recordatorio diario",
+    "reminderDesc": "Un pequeño aviso para leer tu frase.",
+    "reminderTime": "Hora",
+    "notifTitle": "Tu sabiduría diaria ha llegado",
+    "notifBody": "Dedica 10 segundos a la frase de hoy.",
+    "notifDenied": "Las notificaciones están desactivadas en los ajustes del sistema.",
+    "shortcut": "Atajo de iOS",
+    "shortcutDesc": "Tu frase en la pantalla de bloqueo",
+    "apiKey": "Clave API personal",
+    "apiKeyCopied": "Clave API copiada",
+    "rate": "Valorar BeWise",
+    "shareApp": "Recomendar a un amigo",
+    "shareAppText": "Leo una frase sabia cada mañana con BeWise: https://bewise.love",
+    "support": "Ayuda y comentarios",
+    "privacy": "Privacidad",
+    "about": "Acerca de",
+    "version": "Versión",
+    "madeBy": "Código abierto, hecho con Capacitor y actualizado en vivo con Capgo."
+  }
+}

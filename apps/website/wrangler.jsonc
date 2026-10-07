@@ -1,0 +1,14 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "bewise-website",
+  "account_id": "9ee3d7479a3c359681e3fab2c8cb22c0",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "bewise.love", "custom_domain": true },
+    { "pattern": "www.bewise.love", "custom_domain": true }
+  ]
+}

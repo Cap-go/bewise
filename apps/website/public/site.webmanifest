@@ -1,0 +1,14 @@
+{
+  "name": "BeWise",
+  "short_name": "BeWise",
+  "description": "One beautiful quote, every day.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1016",
+  "theme_color": "#0b1016",
+  "icons": [
+    { "src": "/icon-128.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

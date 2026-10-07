@@ -1,0 +1,84 @@
+---
+import { site } from '../data/site'
+import Page from '../layouts/Page.astro'
+
+const faqs = [
+  {
+    q: 'How do I change the theme of my daily quote?',
+    a: `<p>Open the <strong>Themes</strong> tab and tap the theme you want, for example Leadership, Love or Programming. Your next quote, the Today screen and the Archive switch to that theme right away. You can change it as often as you like.</p>`,
+  },
+  {
+    q: 'How do I change the language?',
+    a: `<p>Go to <strong>Settings → Language</strong> and pick English, Français, Español, Deutsch or Italiano. The app interface and your daily quote both switch to that language. If a quote isn’t available in your language yet, BeWise shows it in English.</p>`,
+  },
+  {
+    q: 'How do daily reminders work?',
+    a: `<p>In <strong>Settings</strong>, turn on <strong>Daily reminder</strong> and choose a time. The first time, iOS or Android asks for permission to send notifications. Reminders are scheduled on your phone itself, so they work offline and we never receive a push token.</p><p>Not getting them? Check that notifications for BeWise are allowed in your phone’s system settings, and that Focus or Do Not Disturb isn’t hiding them.</p>`,
+  },
+  {
+    q: 'Can I see my quote on the lock screen with an iOS Shortcut?',
+    a: `<p>Yes. In <strong>Settings</strong>, tap <strong>Personal API key</strong> to copy your key. Then create a Shortcut with a <strong>Get Contents of URL</strong> action pointing to:</p><pre><code>GET https://api.bewise.love/v1/users/{key}/today</code></pre><p>It returns today’s quote in your theme and language as JSON. Schedule it with a daily automation to get it as a lock screen notification. <a href="/shortcut">Read the step-by-step guide</a>.</p>`,
+  },
+  {
+    q: 'How do I share a quote?',
+    a: `<p>On the Today screen, tap <strong>Share</strong>. BeWise renders the quote and its photo as a clean image card that you can send in any messaging app or post to your stories. Use the copy button to grab just the text.</p>`,
+  },
+  {
+    q: 'Can I read older quotes?',
+    a: `<p>Yes. The <strong>Archive</strong> tab lists every past quote in your current theme, newest first. Switch theme to browse a different archive.</p>`,
+  },
+  {
+    q: 'Do I need an account? Is BeWise really free?',
+    a: `<p>No account, ever. BeWise is free, shows no ads and contains no tracking SDKs. The app is an open-source showcase by <a href="${site.capgo}">Capgo</a>; you can read all of its code on <a href="${site.github}">GitHub</a>.</p>`,
+  },
+  {
+    q: 'How do I delete my data?',
+    a: `<p>Deleting the app removes everything stored on your phone. To also erase the anonymous record on our server (your preferences and votes), email <a href="mailto:${site.email}?subject=BeWise%20data%20deletion">${site.email}</a> with the personal API key from <strong>Settings → Personal API key</strong>. We’ll delete it within 30 days and confirm. See the <a href="/privacy">privacy policy</a> for details.</p>`,
+  },
+  {
+    q: 'I found a wrong quote or attribution.',
+    a: `<p>Thank you! Email us the date, the theme and what’s wrong, or open an issue on <a href="${site.github}/issues">GitHub</a>. We fix quotes quickly, and thanks to Capgo live updates, app fixes reach you without waiting for a store release.</p>`,
+  },
+]
+---
+
+<Page
+  title="Support"
+  description="Answers to common BeWise questions: themes, languages, daily reminders, the iOS Shortcut and deleting your data."
+  eyebrow="Support"
+  heading="How can we help?"
+  lead="Quick answers to the questions we hear most. Still stuck? Write to us and a real person will reply."
+>
+  <div class="space-y-3">
+    {
+      faqs.map((f, i) => (
+        <details class="group rounded-2xl border border-white/[0.08] bg-ink-2 transition-colors open:border-white/15 open:bg-ink-3/60" open={i === 0}>
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-6 rounded-2xl px-6 py-5 text-left text-[1.05rem] font-semibold [&::-webkit-details-marker]:hidden">
+            {f.q}
+            <span class="grid size-8 shrink-0 place-items-center rounded-full border border-white/10 text-white/70 transition-transform duration-300 group-open:rotate-45 motion-reduce:transition-none" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+            </span>
+          </summary>
+          <div class="prose px-6 pb-6 text-base" set:html={f.a} />
+        </details>
+      ))
+    }
+  </div>
+
+  <section id="contact" class="ring-brand relative mt-14 overflow-hidden rounded-3xl bg-ink-2 p-8 sm:p-10" aria-labelledby="contact-title">
+    <div aria-hidden="true" class="absolute -top-24 -right-24 size-72 rounded-full bg-aqua/15 blur-3xl"></div>
+    <div class="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 id="contact-title" class="font-display text-3xl font-semibold">Still need help?</h2>
+        <p class="mt-2 max-w-md text-white/70">Tell us your device, app version (Settings → About) and what happened. We read every message.</p>
+      </div>
+      <a
+        href={`mailto:${site.email}?subject=BeWise%20support`}
+        class="inline-flex h-12 shrink-0 items-center gap-2 self-start rounded-full bg-white px-6 font-semibold text-ink transition hover:bg-mint sm:self-auto"
+      >
+        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+        Email {site.email}
+      </a>
+    </div>
+  </section>
+</Page>
