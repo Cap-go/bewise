@@ -185,10 +185,7 @@ struct QuoteWidgetView: View {
             Text("“\(entry.quote.text)”")
         case .accessoryRectangular:
             VStack(alignment: .leading, spacing: 2) {
-                Text(entry.quote.text)
-                    .font(.system(.headline, design: .serif))
-                    .lineLimit(3)
-                    .minimumScaleFactor(0.7)
+                FittingText(text: quoteText, sizes: [15, 13, 12, 11], weight: .semibold)
                     .widgetAccentable()
                 if !entry.quote.author.isEmpty {
                     Text(entry.quote.author)
@@ -207,9 +204,45 @@ struct QuoteWidgetView: View {
     private var isSmall: Bool { family == .systemSmall }
     private var isLarge: Bool { family == .systemLarge || family == .systemExtraLarge }
 
+    /// Quotes come from many sources: collapse stray double spaces and line breaks.
+    private var quoteText: String {
+        entry.quote.text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+    }
+
+    /// Layouts to try, roomiest first: long quotes step the font down, then drop the
+    /// eyebrow row to win space, so the whole quote fits instead of being cut off.
+    private var layouts: [CardLayout] {
+        let withHeader: [CGFloat]
+        let compact: [CGFloat]
+        if isSmall {
+            withHeader = []
+            compact = [16, 15, 14, 13, 12, 11]
+        } else if isLarge {
+            withHeader = [28, 26, 24, 22, 20, 18, 16, 15, 14]
+            compact = [14, 13, 12]
+        } else {
+            withHeader = [20, 18, 17, 16, 15, 14, 13]
+            compact = [14, 13, 12, 11]
+        }
+        return withHeader.map { CardLayout(header: true, size: $0) } + compact.map { CardLayout(header: false, size: $0) }
+    }
+
     private var photoCard: some View {
+        // ViewThatFits keeps the first layout whose natural height fits; if none does,
+        // the last one is used and its quote truncates.
+        ViewThatFits(in: .vertical) {
+            ForEach(layouts, id: \.self) { layout in
+                cardContent(layout)
+            }
+        }
+        .padding(isSmall ? 14 : 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .widgetBackground(background)
+    }
+
+    private func cardContent(_ layout: CardLayout) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            if !isSmall {
+            if layout.header {
                 HStack(alignment: .firstTextBaseline) {
                     Text(entry.eyebrow.uppercased())
                         .font(.system(size: 10, weight: .semibold))
@@ -226,12 +259,10 @@ struct QuoteWidgetView: View {
                     }
                 }
             }
-            Spacer(minLength: 6)
-            Text(entry.quote.text)
-                .font(.system(size: isSmall ? 16 : isLarge ? 28 : 20, weight: .semibold, design: .serif))
+            Spacer(minLength: layout.header ? 6 : 0)
+            Text(quoteText)
+                .font(.system(size: layout.size, weight: .semibold, design: .serif))
                 .foregroundStyle(.white)
-                .lineLimit(isSmall ? 6 : isLarge ? 9 : 4)
-                .minimumScaleFactor(0.55)
                 .shadow(color: .black.opacity(0.35), radius: 8, y: 2)
             if !entry.quote.author.isEmpty {
                 HStack(spacing: 6) {
@@ -241,12 +272,9 @@ struct QuoteWidgetView: View {
                         .foregroundStyle(.white.opacity(0.85))
                         .lineLimit(1)
                 }
-                .padding(.top, isSmall ? 6 : 10)
+                .padding(.top, isSmall || !layout.header ? 6 : 10)
             }
         }
-        .padding(isSmall ? 14 : 16)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .widgetBackground(background)
     }
 
     var background: some View {
@@ -268,6 +296,27 @@ struct QuoteWidgetView: View {
             }
             .clipped()
     }
+}
+
+/// Serif text at the largest size that fits the space it is given. Falls back to
+/// the smallest size, truncated, when even that does not fit.
+private struct FittingText: View {
+    let text: String
+    let sizes: [CGFloat]
+    let weight: Font.Weight
+
+    var body: some View {
+        ViewThatFits(in: .vertical) {
+            ForEach(sizes, id: \.self) { size in
+                Text(text).font(.system(size: size, weight: weight, design: .serif))
+            }
+        }
+    }
+}
+
+private struct CardLayout: Hashable {
+    let header: Bool
+    let size: CGFloat
 }
 
 private extension View {

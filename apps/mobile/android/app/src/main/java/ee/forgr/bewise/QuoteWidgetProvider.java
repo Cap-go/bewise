@@ -9,8 +9,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.RemoteViews;
 import app.capgo.widgetkit.CapgoNativeWidgetBridge;
@@ -101,8 +107,9 @@ public class QuoteWidgetProvider extends AppWidgetProvider {
         for (final int id : ids) {
             final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_quote);
             views.setTextViewText(R.id.widget_eyebrow, eyebrow);
+            final String text = quote != null ? clean(quote.optString("text")) : context.getString(R.string.widget_sample_quote);
+            views.setTextViewText(R.id.widget_quote, text);
             if (quote != null) {
-                views.setTextViewText(R.id.widget_quote, quote.optString("text"));
                 final String author = quote.optString("author").trim();
                 views.setTextViewText(R.id.widget_author, author.isEmpty() ? "" : "— " + author);
             }
@@ -117,8 +124,12 @@ public class QuoteWidgetProvider extends AppWidgetProvider {
             final int height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 180);
             final boolean small = width < 200 || height < 150;
             views.setViewVisibility(R.id.widget_eyebrow, small ? View.GONE : View.VISIBLE);
-            views.setTextViewTextSize(R.id.widget_quote, android.util.TypedValue.COMPLEX_UNIT_SP, small ? 14 : height > 300 ? 24 : 18);
-            views.setInt(R.id.widget_quote, "setMaxLines", small ? 5 : height > 300 ? 9 : 4);
+            // Room left for the quote: 16dp padding, eyebrow row, author row.
+            final int quoteWidth = width - 32;
+            final int quoteHeight = height - 32 - (small ? 0 : 18) - 26;
+            final int[] fit = fitText(context, text, quoteWidth, quoteHeight, small ? 16 : height > 300 ? 26 : 20, 11);
+            views.setTextViewTextSize(R.id.widget_quote, TypedValue.COMPLEX_UNIT_SP, fit[0]);
+            views.setInt(R.id.widget_quote, "setMaxLines", fit[1]);
 
             final Intent open = new Intent(context, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             views.setOnClickPendingIntent(
@@ -127,6 +138,33 @@ public class QuoteWidgetProvider extends AppWidgetProvider {
             );
             manager.updateAppWidget(id, views);
         }
+    }
+
+    /**
+     * Largest serif bold size (sp) at which the whole quote fits the box (dp), and the line count that
+     * fits at that size. Long quotes shrink instead of pushing the author out of the card; past the
+     * minimum size they are ellipsized.
+     */
+    private static int[] fitText(final Context context, final String text, final int widthDp, final int heightDp, final int maxSp, final int minSp) {
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final int width = Math.max(1, Math.round(widthDp * metrics.density));
+        final int height = Math.max(1, Math.round(heightDp * metrics.density));
+        final TextPaint paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTypeface(Typeface.create(Typeface.SERIF, Typeface.BOLD));
+        int size = maxSp;
+        for (; size > minSp; size--) {
+            paint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, size, metrics));
+            if (StaticLayout.Builder.obtain(text, 0, text.length(), paint, width).build().getHeight() <= height) {
+                break;
+            }
+        }
+        paint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, size, metrics));
+        return new int[] { size, Math.max(1, (int) (height / paint.getFontSpacing())) };
+    }
+
+    /** Quotes come from many sources: collapse stray double spaces and line breaks. */
+    private static String clean(final String text) {
+        return text.replaceAll("\\s+", " ").trim();
     }
 
     private static JSONObject readPrefs(final Context context) {
