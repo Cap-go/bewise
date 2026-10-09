@@ -7,6 +7,7 @@
   "observability": { "enabled": true },
   "routes": [{ "pattern": "api.bewise.love", "custom_domain": true }],
   "triggers": { "crons": ["5 0 * * *"] },
+  "services": [{ "binding": "TRANSLATE", "service": "bewise-translate" }],
   "d1_databases": [
     {
       "binding": "DB",

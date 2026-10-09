@@ -19,7 +19,7 @@ const quote = ref<Quote | null>(quoteCache.get(id.value) ?? null)
 
 onMounted(async () => {
   try {
-    quote.value = await api.quote(id.value, state.userId)
+    quote.value = await api.quote(id.value, state.lang, state.userId)
   }
   catch {}
 })

@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - apps/api/**
+      - apps/translate/**
+      - apps/mobile/src/locales/en.json
       - .github/workflows/api.yml
   workflow_dispatch:
 
@@ -25,6 +27,10 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun --cwd apps/api typecheck
+      - run: bun --cwd apps/translate typecheck
+      - name: Deploy translation Worker
+        working-directory: apps/translate
+        run: bunx wrangler deploy
       - name: Apply D1 migrations
         working-directory: apps/api
         run: bunx wrangler d1 migrations apply bewise --remote

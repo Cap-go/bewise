@@ -38,7 +38,7 @@ export const api = {
     request<Quote>(`/v1/quotes/today?${qs({ category, lang, date, user })}`),
   archive: (category: string, lang: string, before: string, limit = 20) =>
     request<Quote[]>(`/v1/quotes?${qs({ category, lang, before, limit })}`),
-  quote: (id: string, user: string) => request<Quote>(`/v1/quotes/${id}?${qs({ user })}`),
+  quote: (id: string, lang: string, user: string) => request<Quote>(`/v1/quotes/${id}?${qs({ lang, user })}`),
   vote: (id: string, user: string) =>
     request<{ votes: number, voted: boolean }>(`/v1/quotes/${id}/vote`, { method: 'POST', body: JSON.stringify({ user }) }),
   categories: (lang: string) => request<Category[]>(`/v1/categories?${qs({ lang, v: 3 })}`),

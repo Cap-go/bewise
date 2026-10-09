@@ -32,7 +32,6 @@
   },
   "settings": {
     "title": "Settings",
-    "language": "Language",
     "reminder": "Daily reminder",
     "reminderDesc": "A gentle nudge to read your quote.",
     "reminderTime": "Time",

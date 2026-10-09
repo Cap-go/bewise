@@ -65,6 +65,14 @@
         "vue-tsc": "latest",
       },
     },
+    "apps/translate": {
+      "name": "@bewise/translate",
+      "devDependencies": {
+        "@cloudflare/workers-types": "latest",
+        "typescript": "^5.9.3",
+        "wrangler": "^4.148.0",
+      },
+    },
     "apps/website": {
       "name": "@bewise/website",
       "version": "1.4.0",
@@ -141,6 +149,8 @@
     "@bewise/api": ["@bewise/api@workspace:apps/api"],
 
     "@bewise/mobile": ["@bewise/mobile@workspace:apps/mobile"],
+
+    "@bewise/translate": ["@bewise/translate@workspace:apps/translate"],
 
     "@bewise/website": ["@bewise/website@workspace:apps/website"],
 
@@ -1753,6 +1763,8 @@
     "@astrojs/sitemap/zod": ["zod@4.6.5", "", {}, "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="],
 
     "@astrojs/telemetry/is-docker": ["is-docker@4.0.0", "", { "bin": { "is-docker": "cli.js" } }, "sha512-LHE+wROyG/Y/0ZnbktRCoTix2c1RhgWaZraMZ8o1Q7zCh0VSrICJQO5oqIIISrcSBtrXv0o233w1IYwsWCjTzA=="],
+
+    "@bewise/translate/@cloudflare/workers-types": ["@cloudflare/workers-types@5.20261009.1", "", {}, "sha512-Oa/7pS2upeCKG0lEvPSGHLK8B8sx3lPanEaXDlOj13H6HfZV5agBeHq5A1VtJj+/x9dXuMJpHTg7U7kTYt4xDA=="],
 
     "@bruits/satteri-wasm32-wasi/@emnapi/core": ["@emnapi/core@1.11.1", "", { "dependencies": { "@emnapi/wasi-threads": "1.2.2", "tslib": "^2.4.0" } }, "sha512-RSvbQmHzdKzNsLYa/wHrbc3KN4sYLKAdPZxqiM2HATqv/SBk2/ENSHpvXGaLOMcsAyz0poEGqkmmKYG3OWiJEQ=="],
 

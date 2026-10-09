@@ -12,12 +12,11 @@ import PageShell from '~/components/PageShell.vue'
 import PageTitle from '~/components/PageTitle.vue'
 import SettingsGroup from '~/components/SettingsGroup.vue'
 import SettingsRow from '~/components/SettingsRow.vue'
-import { setLocale } from '~/i18n'
 import { API_URL } from '~/lib/api'
 import { push } from '~/lib/chrome'
 import { haptic, showToast } from '~/lib/feedback'
 import { cancelReminder, scheduleReminder } from '~/lib/reminder'
-import { LANGS, state } from '~/lib/state'
+import { state } from '~/lib/state'
 import pkg from '../../package.json'
 
 const { t } = useI18n()
@@ -35,14 +34,6 @@ const icons = {
   lock: icon('<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'),
   code: icon('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>'),
   sparkles: icon('<path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/>'),
-}
-
-function chooseLang(id: string) {
-  void haptic.select()
-  state.lang = id
-  setLocale(id)
-  if (state.reminder)
-    void scheduleReminder(state.reminderTime)
 }
 
 async function toggleReminder() {
@@ -98,12 +89,6 @@ onMounted(async () => {
   <PageShell tab="settings">
     <div class="page-scroll mx-auto max-w-2xl space-y-7">
       <PageTitle :title="t('settings.title')" />
-
-      <SettingsGroup :title="t('settings.language')">
-        <SettingsRow v-for="lang in LANGS" :key="lang.id" :label="lang.name" @click="chooseLang(lang.id)">
-          <svg v-if="state.lang === lang.id" viewBox="0 0 24 24" class="size-5 text-sky" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-        </SettingsRow>
-      </SettingsGroup>
 
       <SettingsGroup :title="t('settings.reminder')" :footer="t('settings.reminderDesc')">
         <SettingsRow :label="t('settings.reminder')" @click="toggleReminder">

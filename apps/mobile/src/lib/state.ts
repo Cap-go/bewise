@@ -1,19 +1,14 @@
 import { Capacitor } from '@capacitor/core'
+import { Device } from '@capacitor/device'
 import { Preferences } from '@capacitor/preferences'
 import { reactive, watch } from 'vue'
+import { normalizeLang } from '../../../translate/src/lang'
 import { api } from './api'
-
-export const LANGS = [
-  { id: 'en', name: 'English' },
-  { id: 'fr', name: 'Français' },
-  { id: 'es', name: 'Español' },
-  { id: 'de', name: 'Deutsch' },
-  { id: 'it', name: 'Italiano' },
-] as const
 
 export interface AppState {
   userId: string
   category: string
+  /** Always the phone's language; content is translated from English for it. */
   lang: string
   reminder: boolean
   reminderTime: string
@@ -21,15 +16,16 @@ export interface AppState {
   onboarded: boolean
 }
 
-function deviceLang(): string {
-  const short = (navigator.language || 'en').slice(0, 2).toLowerCase()
-  return LANGS.some(l => l.id === short) ? short : 'en'
+/** WKWebView reports the app's own localization (English), not the phone's: ask the OS. */
+async function deviceLang(): Promise<string> {
+  const tag = await Device.getLanguageTag().then(r => r.value).catch(() => navigator.language)
+  return normalizeLang(tag)
 }
 
 export const state = reactive<AppState>({
   userId: '',
   category: 'inspire',
-  lang: deviceLang(),
+  lang: normalizeLang(navigator.language),
   reminder: false,
   reminderTime: '08:00',
   onboarded: false,
@@ -39,8 +35,8 @@ const KEY = 'bewise.state'
 
 /**
  * Users upgrading from the 2.x app keep their identity: their anonymous
- * Supabase user id (also their Shortcut "API key"), theme and language were
- * stored in WebView localStorage, which survives the update.
+ * Supabase user id (also their Shortcut "API key") and theme were stored in
+ * WebView localStorage, which survives the update.
  */
 function legacyState(): Partial<AppState> {
   const legacy: Partial<AppState> = {}
@@ -52,18 +48,15 @@ function legacyState(): Partial<AppState> {
   }
   catch {}
   const category = localStorage.getItem('category')
-  const lang = localStorage.getItem('language')
   if (category)
     legacy.category = category
-  if (lang && LANGS.some(l => l.id === lang))
-    legacy.lang = lang
   return legacy
 }
 
 export async function loadState(appVersion: string) {
   const { value } = await Preferences.get({ key: KEY })
   const saved = value ? JSON.parse(value) as Partial<AppState> : legacyState()
-  Object.assign(state, saved)
+  Object.assign(state, saved, { lang: await deviceLang() })
   if (!state.userId)
     state.userId = crypto.randomUUID()
 

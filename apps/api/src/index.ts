@@ -2,10 +2,16 @@ import { Hono } from 'hono'
 import { cache } from 'hono/cache'
 import { cors } from 'hono/cors'
 import { HTTPException } from 'hono/http-exception'
-import { addDays, isoDate, QUOTE_LANGS, scheduleCategoryDay, scheduleDay } from './schedule'
+import messages from '../../mobile/src/locales/en.json'
+import { normalizeLang } from '../../translate/src/lang'
+import { addDays, isoDate, scheduleCategoryDay, scheduleDay } from './schedule'
+
+type Kind = 'quote' | 'category' | 'ui'
 
 interface Env {
   DB: D1Database
+  /** bewise-translate: English in, any language out, cached per string. */
+  TRANSLATE: Fetcher & { translate: (texts: string[], lang: string, kind?: Kind, contexts?: string[]) => Promise<string[]> }
 }
 
 interface QuoteRow {
@@ -24,18 +30,34 @@ const DAY_RE = /^\d{4}-\d{2}-\d{2}$/
 const ID_RE = /^[\w-]{8,64}$/
 const CATEGORY_RE = /^[a-z_]{2,32}$/
 
-function quoteLang(lang: string | undefined): string {
-  const short = (lang ?? 'en').slice(0, 2).toLowerCase()
-  return (QUOTE_LANGS as readonly string[]).includes(short) ? short : 'en'
+/** Only English is stored: translate on the way out, falling back to English. */
+async function translate(env: Env, texts: string[], lang: string, kind: Kind, contexts: string[] = []): Promise<string[]> {
+  if (lang === 'en' || texts.length === 0)
+    return texts
+  try {
+    const out: string[] = []
+    for (let i = 0; i < texts.length; i += 100)
+      out.push(...await env.TRANSLATE.translate(texts.slice(i, i + 100), lang, kind, contexts.slice(i, i + 100)))
+    return out
+  }
+  catch (error) {
+    console.error('translate failed', lang, kind, error)
+    return texts
+  }
 }
 
-function serializeQuote(row: QuoteRow, voted = false) {
+async function serializeQuotes(env: Env, rows: QuoteRow[], lang: string, voted = false) {
+  const texts = await translate(env, rows.map(r => r.text), lang, 'quote')
+  return rows.map((row, i) => serializeQuote(row, lang, texts[i], voted))
+}
+
+function serializeQuote(row: QuoteRow, lang: string, text: string, voted = false) {
   return {
     id: row.id,
     category: row.category_id,
-    lang: row.lang,
+    lang,
     date: row.date,
-    text: row.text,
+    text,
     author: row.author,
     img: row.img,
     tags: JSON.parse(row.tags || '[]') as string[],
@@ -67,20 +89,37 @@ function requireId(id: string | undefined, name: string): string {
   return id
 }
 
-async function findQuote(db: D1Database, category: string, lang: string, day: string) {
-  const query = db.prepare('SELECT * FROM quotes WHERE category_id = ? AND lang = ? AND date = ?')
-  return (await query.bind(category, lang, day).first<QuoteRow>())
-    ?? (lang !== 'en' ? await query.bind(category, 'en', day).first<QuoteRow>() : null)
+function findQuote(db: D1Database, category: string, day: string) {
+  return db.prepare('SELECT * FROM quotes WHERE category_id = ? AND lang = \'en\' AND date = ?').bind(category, day).first<QuoteRow>()
 }
 
-async function todayQuote(db: D1Database, requested: string, lang: string, day: string) {
+async function todayQuote(db: D1Database, requested: string, day: string) {
   // Retired themes (and unknown ids) fall back to Inspiration.
   const active = await db.prepare('SELECT 1 FROM categories WHERE id = ? AND active = 1').bind(requested).first()
   const category = active ? requested : 'inspire'
-  let row = await findQuote(db, category, lang, day)
+  let row = await findQuote(db, category, day)
   if (!row && await scheduleCategoryDay(db, category, day))
-    row = await findQuote(db, category, lang, day)
+    row = await findQuote(db, category, day)
   return row
+}
+
+interface Messages { [key: string]: string | Messages }
+
+/** Every string of the messages tree, with its key path ("tabs.archive"). */
+function leaves(obj: Messages, prefix = '', out: [string, string][] = []): [string, string][] {
+  for (const [key, value] of Object.entries(obj))
+    typeof value === 'string' ? out.push([prefix + key, value]) : leaves(value, `${prefix}${key}.`, out)
+  return out
+}
+
+function rebuild(obj: Messages, values: string[], at = { i: 0 }): Messages {
+  return Object.fromEntries(Object.entries(obj).map(([key, value]) =>
+    [key, typeof value === 'string' ? values[at.i++] : rebuild(value, values, at)]))
+}
+
+/** Keep translated strings valid vue-i18n syntax: only `{name}` placeholders are special. */
+function escapeMessage(text: string): string {
+  return text.replace(/\{\w+\}|[{}@|]/g, m => m.length > 1 ? m : m === '{' || m === '}' ? '' : `{'${m}'}`)
 }
 
 async function hasVoted(db: D1Database, quoteId: string, userId: string | undefined) {
@@ -103,30 +142,40 @@ app.onError((err, c) => {
 app.get('/', c => c.json({ name: 'bewise-api', ok: true }))
 
 app.get('/v1/categories', cache({ cacheName: 'bewise-categories', cacheControl: 'public, max-age=3600' }), async (c) => {
-  const lang = quoteLang(c.req.query('lang'))
+  const lang = normalizeLang(c.req.query('lang'))
   const { results } = await c.env.DB.prepare(`
     SELECT c.id, c.name, c.sort,
       (SELECT img FROM quotes q WHERE q.category_id = c.id AND q.lang = 'en' AND q.img IS NOT NULL ORDER BY q.date DESC LIMIT 1) AS img
     FROM categories c WHERE c.active = 1 ORDER BY c.sort`).all<{ id: string, name: string, sort: number, img: string | null }>()
-  return c.json(results.map((row) => {
-    const names = JSON.parse(row.name || '{}') as Record<string, string>
-    return { id: row.id, name: names[lang] ?? names.en ?? row.id, img: row.img }
-  }))
+  const english = results.map(row => (JSON.parse(row.name || '{}') as Record<string, string>).en ?? row.id)
+  const names = await translate(c.env, english, lang, 'category')
+  return c.json(results.map((row, i) => ({ id: row.id, name: names[i], img: row.img })))
+})
+
+// App strings for any language, translated from the English source of the app.
+app.get('/v1/i18n/:lang', cache({ cacheName: 'bewise-i18n', cacheControl: 'public, max-age=86400' }), async (c) => {
+  const lang = normalizeLang(c.req.param('lang'))
+  const source = messages as Messages
+  const strings = leaves(source)
+  const english = strings.map(([, text]) => text)
+  const values = lang === 'en' ? english : (await translate(c.env, english, lang, 'ui', strings.map(([key]) => key))).map(escapeMessage)
+  return c.json({ lang, messages: rebuild(source, values) })
 })
 
 app.get('/v1/quotes/today', async (c) => {
   const category = requireCategory(c.req.query('category'))
-  const lang = quoteLang(c.req.query('lang'))
+  const lang = normalizeLang(c.req.query('lang'))
   const day = resolveDay(c.req.query('date'))
-  const row = await todayQuote(c.env.DB, category, lang, day)
+  const row = await todayQuote(c.env.DB, category, day)
   if (!row)
     throw new HTTPException(404, { message: 'no quote' })
-  return c.json(serializeQuote(row, await hasVoted(c.env.DB, row.id, c.req.query('user'))))
+  const [quote] = await serializeQuotes(c.env, [row], lang, await hasVoted(c.env.DB, row.id, c.req.query('user')))
+  return c.json(quote)
 })
 
 app.get('/v1/quotes', async (c) => {
   const category = requireCategory(c.req.query('category'))
-  const lang = quoteLang(c.req.query('lang'))
+  const lang = normalizeLang(c.req.query('lang'))
   const maxBefore = addDays(isoDate(new Date()), 1)
   const requested = c.req.query('before') ?? maxBefore
   if (!DAY_RE.test(requested))
@@ -139,11 +188,11 @@ app.get('/v1/quotes', async (c) => {
     .prepare(`
       SELECT * FROM (
         SELECT *, row_number() OVER (PARTITION BY text ORDER BY date DESC) AS rn
-        FROM quotes WHERE category_id = ?1 AND lang = ?2 AND date < ?3
-      ) WHERE rn = 1 AND date < ?4 ORDER BY date DESC LIMIT ?5`)
-    .bind(category, lang, maxBefore, before, limit)
+        FROM quotes WHERE category_id = ?1 AND lang = 'en' AND date < ?2
+      ) WHERE rn = 1 AND date < ?3 ORDER BY date DESC LIMIT ?4`)
+    .bind(category, maxBefore, before, limit)
     .all<QuoteRow>()
-  return c.json(results.map(row => serializeQuote(row)))
+  return c.json(await serializeQuotes(c.env, results, lang))
 })
 
 app.get('/v1/quotes/:id', async (c) => {
@@ -151,7 +200,8 @@ app.get('/v1/quotes/:id', async (c) => {
   const row = await c.env.DB.prepare('SELECT * FROM quotes WHERE id = ?').bind(id).first<QuoteRow>()
   if (!row)
     throw new HTTPException(404, { message: 'not found' })
-  return c.json(serializeQuote(row, await hasVoted(c.env.DB, row.id, c.req.query('user'))))
+  const [quote] = await serializeQuotes(c.env, [row], normalizeLang(c.req.query('lang')), await hasVoted(c.env.DB, row.id, c.req.query('user')))
+  return c.json(quote)
 })
 
 app.post('/v1/quotes/:id/vote', async (c) => {
@@ -180,7 +230,7 @@ app.put('/v1/users/:id', async (c) => {
       category_id = coalesce(?2, category_id), lang = coalesce(?3, lang),
       platform = coalesce(?4, platform), app_version = coalesce(?5, app_version),
       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')`)
-    .bind(id, body.category?.slice(0, 32) ?? null, body.lang?.slice(0, 8) ?? null, body.platform?.slice(0, 16) ?? null, body.appVersion?.slice(0, 32) ?? null)
+    .bind(id, body.category?.slice(0, 32) ?? null, body.lang ? normalizeLang(body.lang) : null, body.platform?.slice(0, 16) ?? null, body.appVersion?.slice(0, 32) ?? null)
     .run()
   return c.json({ ok: true })
 })
@@ -191,10 +241,11 @@ app.get('/v1/users/:id/today', async (c) => {
   const user = await c.env.DB.prepare('SELECT category_id, lang FROM users WHERE id = ?').bind(id).first<{ category_id: string | null, lang: string }>()
   if (!user)
     throw new HTTPException(404, { message: 'user not found' })
-  const row = await todayQuote(c.env.DB, user.category_id ?? 'inspire', quoteLang(user.lang), resolveDay(c.req.query('date')))
+  const row = await todayQuote(c.env.DB, user.category_id ?? 'inspire', resolveDay(c.req.query('date')))
   if (!row)
     throw new HTTPException(404, { message: 'no quote' })
-  return c.json(serializeQuote(row))
+  const [quote] = await serializeQuotes(c.env, [row], normalizeLang(user.lang))
+  return c.json(quote)
 })
 
 app.get('/v1/settings', cache({ cacheName: 'bewise-settings', cacheControl: 'public, max-age=3600' }), async (c) => {
@@ -208,8 +259,22 @@ export default {
     const today = isoDate(new Date())
     // Cover users ahead of UTC (up to +14h) by preparing tomorrow too.
     // Sequential so both days never pick the same archived source.
-    ctx.waitUntil(scheduleDay(env.DB, today).then(() => scheduleDay(env.DB, addDays(today, 1))))
+    ctx.waitUntil((async () => {
+      await scheduleDay(env.DB, today)
+      await scheduleDay(env.DB, addDays(today, 1))
+      await warmTranslations(env, addDays(today, 1))
+    })())
   },
+}
+
+/** Translate tomorrow's quotes into our readers' languages ahead of time, so nobody waits on the model. */
+async function warmTranslations(env: Env, day: string) {
+  const [{ results: langs }, { results: rows }] = await env.DB.batch([
+    env.DB.prepare('SELECT lang FROM users WHERE lang != \'en\' GROUP BY lang ORDER BY count(*) DESC LIMIT 30'),
+    env.DB.prepare('SELECT text FROM quotes WHERE lang = \'en\' AND date = ?').bind(day),
+  ]) as [D1Result<{ lang: string }>, D1Result<{ text: string }>]
+  for (const lang of new Set(langs.map(l => normalizeLang(l.lang))))
+    await translate(env, rows.map(r => r.text), lang, 'quote')
 }
 
 export { app }

@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bewise-translate",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "account_id": "9ee3d7479a3c359681e3fab2c8cb22c0",
+  "observability": { "enabled": true },
+  // Private: only bewise-api calls it, through a service binding.
+  "workers_dev": false,
+  "preview_urls": false,
+  "ai": { "binding": "AI" },
+  "kv_namespaces": [
+    { "binding": "TRANSLATIONS", "id": "e29324c39e97481fbd0a8bab1d7753ac" }
+  ],
+  "vars": {
+    "MODEL": "@cf/mistralai/mistral-small-3.1-24b-instruct"
+  }
+}

@@ -1,11 +1,10 @@
 // Daily quote scheduling.
-// BeWise has ~1,100 unique hand-picked quotes (2019-2025) translated in five
-// languages. Instead of depending on third-party quote APIs (which broke the
-// old backend), each day re-features an archived quote for every active theme,
-// with all its translations. The least recently shown quote goes first, so a
-// theme cycles through its whole pool before repeating; loved quotes break ties.
-
-export const QUOTE_LANGS = ['en', 'fr', 'es', 'de', 'it'] as const
+// BeWise has ~1,100 unique hand-picked quotes (2019-2025), stored in English
+// (bewise-translate serves every other language). Instead of depending on
+// third-party quote APIs (which broke the old backend), each day re-features an
+// archived quote for every active theme. The least recently shown quote goes
+// first, so a theme cycles through its whole pool before repeating; loved
+// quotes break ties.
 
 export function isoDate(date: Date): string {
   return date.toISOString().slice(0, 10)
@@ -40,8 +39,8 @@ export async function scheduleCategoryDay(db: D1Database, categoryId: string, da
   if (existing)
     return false
 
-  // Candidates: original (non-rerun) English days with a photo and every
-  // translation. Rank their text by when it was last shown in this theme.
+  // Candidates: original (non-rerun) days with a photo and an author.
+  // Rank their text by when it was last shown in this theme.
   const source = await db
     .prepare(`
       WITH shown AS (
@@ -52,10 +51,9 @@ export async function scheduleCategoryDay(db: D1Database, categoryId: string, da
       SELECT q.date FROM shown s
       JOIN quotes q ON q.category_id = ?1 AND q.lang = 'en' AND q.text = s.text
       WHERE q.source_date IS NULL AND q.img IS NOT NULL AND q.img != '' AND trim(q.author) != ''
-        AND (SELECT count(*) FROM quotes t WHERE t.category_id = ?1 AND t.date = q.date) >= ?3
       ORDER BY s.last_shown ASC, s.votes DESC, random()
       LIMIT 1`)
-    .bind(categoryId, day, QUOTE_LANGS.length)
+    .bind(categoryId, day)
     .first<{ date: string }>()
   if (!source)
     return false
@@ -64,7 +62,7 @@ export async function scheduleCategoryDay(db: D1Database, categoryId: string, da
     .prepare(`
       INSERT OR IGNORE INTO quotes (id, category_id, lang, date, text, author, img, tags, total_votes, source_date)
       SELECT lower(hex(randomblob(16))), category_id, lang, ?3, text, author, img, tags, 0, date
-      FROM quotes WHERE category_id = ?1 AND date = ?2`)
+      FROM quotes WHERE category_id = ?1 AND lang = 'en' AND date = ?2`)
     .bind(categoryId, source.date, day)
     .run()
   return true
