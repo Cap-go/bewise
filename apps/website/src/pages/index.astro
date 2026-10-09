@@ -14,7 +14,7 @@ const q = fallbackQuotes.inspire!
 const stats = [
   { value: '1,100+', label: 'quotes in the archive' },
   { value: '9', label: 'themes to choose from' },
-  { value: '5', label: 'languages' },
+  { value: 'Any', label: 'language, translated for you' },
   { value: 'Since 2019', label: 'on the App Store' },
 ]
 
@@ -22,7 +22,7 @@ const screens = [
   { shot: '/screenshots/today.png', title: 'Today', text: 'One quote, full screen, on a photo worth pausing for.', alt: 'BeWise Today screen showing the quote of the day on a full-bleed photo' },
   { shot: '/screenshots/archive.png', title: 'Archive', text: 'Scroll back through every quote in your theme.', alt: 'BeWise Archive screen listing past daily quotes' },
   { shot: '/screenshots/themes.png', title: 'Themes', text: 'Nine moods, from Leadership to Humour.', alt: 'BeWise Themes screen with a grid of quote categories' },
-  { shot: '/screenshots/settings.png', title: 'Settings', text: 'Language, reminder time and your Shortcut key.', alt: 'BeWise Settings screen with language, reminder and shortcut options' },
+  { shot: '/screenshots/settings.png', title: 'Settings', text: 'Reminder time and your Shortcut key.', alt: 'BeWise Settings screen with language, reminder and shortcut options' },
 ]
 
 const stack = [
@@ -144,6 +144,30 @@ const icon = {
           Shared as an image card
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- VIDEO -->
+  <section id="video" class="px-5 pb-8 sm:px-8" aria-labelledby="video-title">
+    <div class="mx-auto max-w-6xl">
+      <h2 id="video-title" class="sr-only">BeWise in 25 seconds</h2>
+      <figure class="ring-brand mx-auto max-w-[22rem] overflow-hidden rounded-[2rem] bg-ink-2 shadow-[0_40px_120px_-40px_rgb(0_192_255/0.35)] md:max-w-none">
+        <video
+          class="block aspect-[886/1920] w-full md:aspect-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          aria-label="BeWise in 25 seconds: a wise quote every morning, in any language, with themes, a gentle reminder, a home screen widget and the full archive"
+        >
+          <!-- Phones get the portrait cut: the 16:9 one is too small to read there. -->
+          <source src="/video/bewise-portrait.webm" type="video/webm" media="(max-width: 767px)" />
+          <source src="/video/bewise-portrait.mp4" type="video/mp4" media="(max-width: 767px)" />
+          <source src="/video/bewise.webm" type="video/webm" />
+          <source src="/video/bewise.mp4" type="video/mp4" />
+        </video>
+      </figure>
     </div>
   </section>
 
@@ -288,9 +312,9 @@ const icon = {
         </article>
         <article class="rounded-3xl border border-white/[0.07] bg-ink-2 p-8 md:col-span-3">
           <svg viewBox="0 0 24 24" class="size-7 text-mint" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icon.globe} /></svg>
-          <h3 class="font-display mt-5 text-2xl font-semibold">Five languages</h3>
-          <p class="mt-2 text-white/65">Read your daily quote in the language you think in.</p>
-          <ul class="mt-6 grid grid-cols-5 gap-2 text-center" aria-label="Languages">
+          <h3 class="font-display mt-5 text-2xl font-semibold">Your language</h3>
+          <p class="mt-2 text-white/65">BeWise follows your phone’s language and translates every quote and screen for you, from Français to 日本語.</p>
+          <ul class="mt-6 grid grid-cols-4 gap-2 text-center sm:grid-cols-7" aria-label="Languages">
             {
               languages.map(l => (
                 <li class="rounded-2xl border border-white/10 bg-white/[0.04] px-1 py-3">

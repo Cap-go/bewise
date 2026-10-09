@@ -2,7 +2,7 @@ export const site = {
   name: 'BeWise',
   url: 'https://bewise.love',
   tagline: 'One beautiful quote, every day.',
-  description: 'BeWise brings you one beautiful quote every morning on a full-bleed photo. 9 themes, 1,100+ quotes, 5 languages. Free, no account, no ads.',
+  description: 'BeWise brings you one beautiful quote every morning on a full-bleed photo. 9 themes, 1,100+ quotes, in your language. Free, no account, no ads.',
   appStoreId: '1448918843',
   appStore: 'https://apps.apple.com/app/id1448918843',
   googlePlay: 'https://play.google.com/store/apps/details?id=ee.forgr.bewise',
@@ -52,6 +52,8 @@ export const languages = [
   { id: 'es', label: 'Español' },
   { id: 'de', label: 'Deutsch' },
   { id: 'it', label: 'Italiano' },
+  { id: 'ja', label: '日本語' },
+  { id: 'hi', label: 'हिन्दी' },
 ] as const
 
 export const themes = [
