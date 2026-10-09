@@ -19,10 +19,10 @@ const stats = [
 ]
 
 const screens = [
-  { shot: '/screenshots/today.png', title: 'Today', text: 'One quote, full screen, on a photo worth pausing for.', alt: 'BeWise Today screen showing the quote of the day on a full-bleed photo' },
-  { shot: '/screenshots/archive.png', title: 'Archive', text: 'Scroll back through every quote in your theme.', alt: 'BeWise Archive screen listing past daily quotes' },
-  { shot: '/screenshots/themes.png', title: 'Themes', text: 'Nine moods, from Leadership to Humour.', alt: 'BeWise Themes screen with a grid of quote categories' },
-  { shot: '/screenshots/settings.png', title: 'Settings', text: 'Reminder time and your Shortcut key.', alt: 'BeWise Settings screen with language, reminder and shortcut options' },
+  { shot: '/screenshots/today.jpg', title: 'Today', text: 'One quote, full screen, on a photo worth pausing for.', alt: 'BeWise Today screen showing the quote of the day on a full-bleed photo' },
+  { shot: '/screenshots/archive.jpg', title: 'Archive', text: 'Scroll back through every quote in your theme.', alt: 'BeWise Archive screen listing past daily quotes' },
+  { shot: '/screenshots/themes.jpg', title: 'Themes', text: 'Nine moods, from Leadership to Humour.', alt: 'BeWise Themes screen with a grid of quote categories' },
+  { shot: '/screenshots/widget.jpg', title: 'Widgets', text: 'Today’s quote and its photo on your Home and Lock Screen.', alt: 'BeWise screen introducing the home screen widget with a preview of today’s quote' },
 ]
 
 const stack = [
@@ -68,6 +68,7 @@ const icon = {
   share: 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13',
   lock: 'M6 11h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Zm2 0V7a4 4 0 1 1 8 0v4',
   shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Zm-3-10 2 2 4-4',
+  widget: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h16v7H4z',
 }
 ---
 
@@ -119,7 +120,7 @@ const icon = {
       <div class="rise relative mx-auto w-full max-w-[19rem] sm:max-w-[21rem]" style="--d:200ms">
         <div aria-hidden="true" class="bg-brand absolute inset-x-6 top-16 bottom-10 -z-10 rounded-[4rem] opacity-40 blur-3xl"></div>
         <div class="float">
-          <Phone screenshot="/screenshots/today.png" alt="BeWise showing today's quote on a full-bleed photo" eager>
+          <Phone screenshot="/screenshots/today.jpg" alt="BeWise showing today's quote on a full-bleed photo" eager>
             <TodayScreen live eager />
           </Phone>
         </div>
@@ -328,11 +329,12 @@ const icon = {
 
         {
           [
+            { i: icon.widget, color: 'text-mint', title: 'Home screen widgets', text: 'Today’s quote and its photo on your Home and Lock Screen, refreshed every morning.' },
             { i: icon.archive, color: 'text-aqua', title: 'The whole archive', text: 'Missed a day? Scroll back through every past quote in your theme.' },
             { i: icon.bell, color: 'text-rose', title: 'A gentle reminder', text: 'Pick a time and BeWise nudges you once a day. Scheduled on your phone.' },
             { i: icon.share, color: 'text-sky', title: 'Share as an image', text: 'Turn any quote into a polished card for messages and stories.' },
           ].map(f => (
-            <article class="rounded-3xl border border-white/[0.07] bg-ink-2 p-8 md:col-span-2">
+            <article class="rounded-3xl border border-white/[0.07] bg-ink-2 p-8 md:col-span-3">
               <svg viewBox="0 0 24 24" class:list={['size-7', f.color]} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d={f.i} />
               </svg>
@@ -371,7 +373,7 @@ const icon = {
       <div class="mx-auto max-w-2xl text-center">
         <p class="text-sm font-semibold tracking-[0.16em] text-aqua uppercase">Inside the app</p>
         <h2 id="screens-title" class="font-display mt-3 text-4xl font-semibold text-balance sm:text-5xl">Designed to get out of the way.</h2>
-        <p class="mt-4 text-lg text-white/65">Four screens, a native Liquid Glass tab bar, and nothing you don’t need.</p>
+        <p class="mt-4 text-lg text-white/65">A few calm screens, a native Liquid Glass tab bar, widgets, and nothing you don’t need.</p>
       </div>
     </div>
     <ul class="mx-auto mt-14 flex max-w-6xl snap-x snap-mandatory gap-6 overflow-x-auto px-5 pb-6 sm:px-8 lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible">
