@@ -20,12 +20,12 @@ const bg = computed(() => photo(props.quote.img, window.innerWidth, window.inner
 const textSize = computed(() => {
   const n = props.quote.text.length
   if (n > 260)
-    return 'text-[1.35rem] leading-[1.35] md:text-[2rem]'
+    return 'text-[1.35rem] leading-[1.35] roomy:text-[1.7rem] spacious:text-[2rem]'
   if (n > 160)
-    return 'text-[1.6rem] leading-[1.3] md:text-[2.4rem]'
+    return 'text-[1.6rem] leading-[1.3] roomy:text-[2rem] spacious:text-[2.4rem]'
   if (n > 90)
-    return 'text-[1.95rem] leading-[1.22] md:text-[2.9rem]'
-  return 'text-[2.4rem] leading-[1.15] md:text-[3.6rem]'
+    return 'text-[1.95rem] leading-[1.22] roomy:text-[2.4rem] spacious:text-[2.9rem]'
+  return 'text-[2.4rem] leading-[1.15] roomy:text-[3rem] spacious:text-[3.6rem]'
 })
 const dateLabel = computed(() => {
   const label = new Date(`${props.quote.date}T12:00:00`).toLocaleDateString(locale.value, { weekday: 'long', month: 'long', day: 'numeric' })
@@ -69,7 +69,7 @@ async function copy() {
 </script>
 
 <template>
-  <section class="relative flex w-full flex-1 flex-col overflow-hidden bg-ink" @click="onTap">
+  <section class="nav-x relative flex w-full flex-1 flex-col overflow-hidden bg-ink" @click="onTap">
     <div class="photo-placeholder absolute inset-0" />
     <img
       v-if="bg"

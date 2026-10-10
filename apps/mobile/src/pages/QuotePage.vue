@@ -31,8 +31,8 @@ onMounted(async () => {
       <QuoteHero v-if="quote" :key="quote.id" :quote="quote" :eyebrow="t('archive.title')" :category="categoryName(quote.category)" />
       <button
         v-if="!isNative"
-        class="pressable absolute left-4 grid size-11 place-items-center rounded-full bg-black/40 backdrop-blur-md"
-        :style="{ top: 'calc(var(--nav-top) + 12px)' }"
+        class="pressable absolute grid size-11 place-items-center rounded-full bg-black/40 backdrop-blur-md"
+        :style="{ top: 'calc(var(--nav-top) + 12px)', left: 'calc(var(--nav-left) + 1rem)' }"
         aria-label="Back"
         @click="back(router)"
       >

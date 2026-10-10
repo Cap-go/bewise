@@ -29,7 +29,7 @@ onMounted(() => {
   <PageShell tab="explore">
     <div class="page-scroll mx-auto max-w-5xl">
       <PageTitle :title="t('explore.title')" :subtitle="t('explore.subtitle')" />
-      <div class="grid grid-cols-2 gap-3 px-4 md:grid-cols-3 lg:grid-cols-4">
+      <div class="grid grid-cols-2 gap-3 px-4 sm:grid-cols-3 lg:grid-cols-4">
         <button
           v-for="(category, i) in categories"
           :key="category.id"

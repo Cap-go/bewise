@@ -2,6 +2,11 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/fraunces';
 
+/* Bigger type only where there is room both ways: iPhone Duo open, iPad.
+   Width alone would also match an iPhone turned to landscape. */
+@custom-variant roomy (@media (min-width: 640px) and (min-height: 800px));
+@custom-variant spacious (@media (min-width: 768px) and (min-height: 700px));
+
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'Fraunces Variable', ui-serif, Georgia, serif;
@@ -18,6 +23,9 @@
   /* The native plugin reports 0 for hidden bars; never go under the status bar / home indicator. */
   --nav-top: max(var(--cap-native-navigation-top, 0px), env(safe-area-inset-top));
   --nav-bottom: max(var(--cap-native-navigation-bottom, 0px), env(safe-area-inset-bottom));
+  /* iPhone Duo puts the status bar on a side edge: keep content clear of it. */
+  --nav-left: max(var(--cap-native-navigation-left, 0px), env(safe-area-inset-left));
+  --nav-right: max(var(--cap-native-navigation-right, 0px), env(safe-area-inset-right));
   color-scheme: dark;
 }
 
@@ -64,6 +72,12 @@ cap-content {
 .page-scroll {
   padding-top: calc(var(--nav-top) + 8px);
   padding-bottom: calc(var(--nav-bottom) + 24px);
+}
+
+.page-scroll,
+.nav-x {
+  padding-left: var(--nav-left);
+  padding-right: var(--nav-right);
 }
 
 /* Shown under photos until they load: quiet and dark, so the image fades in

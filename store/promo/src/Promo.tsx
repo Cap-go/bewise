@@ -3,12 +3,12 @@ import { loadFont as loadFraunces } from '@remotion/google-fonts/Fraunces'
 import { loadFont as loadInter } from '@remotion/google-fonts/Inter'
 import { AbsoluteFill, Easing, Img, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion'
 
-const serif = loadFraunces('normal', { weights: ['600'], subsets: ['latin', 'latin-ext'] }).fontFamily
-const sans = loadInter('normal', { weights: ['400', '500', '600'], subsets: ['latin', 'latin-ext'] }).fontFamily
+export const serif = loadFraunces('normal', { weights: ['600'], subsets: ['latin', 'latin-ext'] }).fontFamily
+export const sans = loadInter('normal', { weights: ['400', '500', '600'], subsets: ['latin', 'latin-ext'] }).fontFamily
 
 // BeWise brand (apps/mobile/src/style.css)
-const C = { ink: '#0b1016', ink2: '#121a23', ink3: '#1b2531', sky: '#00c0ff', aqua: '#00d9f2', mint: '#a6ffcb', rose: '#ff5f8f' }
-const GRADIENT = `linear-gradient(90deg, ${C.sky}, ${C.mint})`
+export const C = { ink: '#0b1016', ink2: '#121a23', ink3: '#1b2531', sky: '#00c0ff', aqua: '#00d9f2', mint: '#a6ffcb', rose: '#ff5f8f' }
+export const GRADIENT = `linear-gradient(90deg, ${C.sky}, ${C.mint})`
 
 // A type alias (not an interface) so Remotion accepts it as Record<string, unknown> props.
 export type PromoProps = { platform: 'appstore' | 'web' }
@@ -52,7 +52,7 @@ function useLayout() {
 }
 
 /** Ink background with two slow teal glows, like the store screenshots. */
-function Backdrop() {
+export function Backdrop() {
   const frame = useCurrentFrame()
   const { width, height } = useVideoConfig()
   const drift = Math.sin(frame / 90) * 60
@@ -72,7 +72,7 @@ function SceneFade({ length, children, out = true }: { length: number, children:
 }
 
 /** Two-line headline: white, then the brand gradient. Words rise in one by one. */
-function Headline({ top, bottom, size, align = 'center', delay = 0 }: { top: string, bottom: string, size: number, align?: 'center' | 'left', delay?: number }) {
+export function Headline({ top, bottom, size, align = 'center', delay = 0 }: { top: string, bottom: string, size: number, align?: 'center' | 'left', delay?: number }) {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   let i = 0
