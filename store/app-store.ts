@@ -178,8 +178,14 @@ for (const [locale, lang] of Object.entries(LOCALES)) {
 async function libraryAsset(file: string) {
   const bytes = readFileSync(join(ROOT, 'creative', file))
   const kind = file.endsWith('.mp4') ? 'appAssetLibraryVideos' : 'appAssetLibraryImages'
+  const referenceName = `BeWise ${file}`
+  // Reuse the copy uploaded by an earlier run instead of filling the library with duplicates.
+  const existing = (await asc(`/v1/appAssetLibraries/${app.id}/${kind === 'appAssetLibraryVideos' ? 'videos' : 'images'}?limit=200`)).data
+    .find((a: any) => a.attributes.referenceName === referenceName && !a.attributes.archived)
+  if (existing)
+    return { kind, id: existing.id as string }
   const asset = (await asc(`/v1/${kind}`, 'POST', {
-    data: { type: kind, attributes: { category: 'CREATIVE_ASSETS', fileName: `bewise-${file}`, fileSize: bytes.length, referenceName: `BeWise ${file}` }, relationships: { assetLibrary: { data: { type: 'appAssetLibraries', id: app.id } } } },
+    data: { type: kind, attributes: { category: 'CREATIVE_ASSETS', fileName: `bewise-${file}`, fileSize: bytes.length, referenceName }, relationships: { assetLibrary: { data: { type: 'appAssetLibraries', id: app.id } } } },
   })).data
   await upload(asset.attributes.uploadOperations, bytes, file)
   await asc(`/v1/${kind}/${asset.id}`, 'PATCH', { data: { type: kind, id: asset.id, attributes: { uploaded: true } } })
@@ -193,10 +199,17 @@ async function placeCreative(locId: string, locale: string) {
   for (const [name, placementType] of [['header', 'PRODUCT_PAGE_HEADER_ASSET'], ['search', 'APP_STORE_SEARCH_RESULTS_ASSET']] as const) {
     const asset = creative[name]
     const media = asset.kind === 'appAssetLibraryVideos' ? 'video' : 'image'
-    await asc('/v1/appAssetLibraryPlacements', 'POST', {
-      data: { type: 'appAssetLibraryPlacements', attributes: { placementType }, relationships: { [media]: { data: { type: asset.kind, id: asset.id } }, appStoreVersionLocalization: { data: { type: 'appStoreVersionLocalizations', id: locId } } } },
-    })
-    console.log(`${locale}: ${placementType}`)
+    try {
+      await asc('/v1/appAssetLibraryPlacements', 'POST', {
+        data: { type: 'appAssetLibraryPlacements', attributes: { placementType }, relationships: { [media]: { data: { type: asset.kind, id: asset.id } }, appStoreVersionLocalization: { data: { type: 'appStoreVersionLocalizations', id: locId } } } },
+      })
+      console.log(`${locale}: ${placementType}`)
+    }
+    catch (error) {
+      if (!/ 409 /.test(String(error)))
+        throw error
+      console.log(`${locale}: ${placementType} already placed`)
+    }
   }
 }
 console.log('done')

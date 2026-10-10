@@ -1,6 +1,7 @@
 // Render the iPhone Duo screenshots and the App Store creative assets.
 //   bun scripts/store-assets.ts
-// Writes store/screenshots/duo-{outer,inner}-{en,fr}/ and store/creative/.
+// Writes store/screenshots/duo-{outer,inner}-{en,fr}/, the widget screenshot of
+// the iPhone and iPad sets, and store/creative/.
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -40,6 +41,16 @@ for (const [lang, shots] of Object.entries(CAPTIONS)) {
       remotion(['still', ENTRY, id, out, '--frame=60', '--image-format=jpeg', '--jpeg-quality=92', `--props=${JSON.stringify({ display, shot, top, bottom })}`])
       console.log(out)
     })
+  }
+}
+
+// The 6.9" iPhone and 13" iPad sets keep their first four screenshots; the
+// fifth (previously Settings with the old language picker) is the widget.
+for (const [lang, top, bottom] of [['en', 'Right on your', 'home screen.'], ['fr', 'Sur votre', 'écran d’accueil.']]) {
+  for (const [display, id] of [['iphone', 'IPhoneShot'], ['ipad', 'IPadShot']]) {
+    const out = join(STORE, 'screenshots', `${display}-${lang}`, '5-widget.jpg')
+    remotion(['still', ENTRY, id, out, '--frame=60', '--image-format=jpeg', '--jpeg-quality=92', `--props=${JSON.stringify({ display, shot: `widget-${lang}`, top, bottom })}`])
+    console.log(out)
   }
 }
 

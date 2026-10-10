@@ -152,8 +152,9 @@ jobs:
           KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
           KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
           PLAY_CONFIG_JSON: ${{ secrets.PLAY_CONFIG_JSON }}
-          # iOS 27.1 SDK: edge to edge on iPhone Duo (older SDKs letterbox the open display).
-          CAPGO_IOS_XCODE_VERSION: '27.1'
+          # iPhone Duo needs the iOS 27 SDK (older SDKs letterbox the open display), but
+          # Capgo Cloud Build only has Xcode 26 machines so far. Set CAPGO_IOS_XCODE_VERSION
+          # to '27' here once they exist; 3.0.17 was archived locally with Xcode 27.
         run: |
           review=""
           if [ "${{ inputs.submit_for_review || 'true' }}" = "true" ]; then review="--submit-to-store-review"; fi

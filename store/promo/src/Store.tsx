@@ -17,11 +17,12 @@ function Device({ src, width, aspect, radius, style }: { src: string, width: num
 }
 
 // ---------------------------------------------------------------------------
-// iPhone Duo screenshots: outer display 1398x2034, inner display 2007x2853.
+// Framed screenshots. iPhone Duo: outer display 1398x2034, inner 2007x2853;
+// also the 6.9" iPhone (1320x2868) and 13" iPad (2064x2752) sizes.
 
 // A type alias (not an interface) so Remotion accepts it as Record<string, unknown> props.
 export type DuoShotProps = {
-  display: 'outer' | 'inner'
+  display: 'outer' | 'inner' | 'iphone' | 'ipad'
   shot: string
   top: string
   bottom: string
@@ -30,6 +31,8 @@ export type DuoShotProps = {
 const DUO = {
   outer: { w: 1398, h: 2034 },
   inner: { w: 2007, h: 2853 },
+  iphone: { w: 1320, h: 2868 },
+  ipad: { w: 2064, h: 2752 },
 }
 export const DUO_SIZES = DUO
 
@@ -37,15 +40,22 @@ export function DuoShot({ display, shot, top, bottom }: DuoShotProps) {
   const { width, height } = useVideoConfig()
   const { w, h } = DUO[display]
   const aspect = w / h
-  const screenH = height * 0.71
+  // iPhone and iPad match the existing store sets: bigger caption, device running off the bottom.
+  const layout = {
+    outer: { screen: 0.71, top: 0.255, caption: 0.072 },
+    inner: { screen: 0.71, top: 0.255, caption: 0.072 },
+    iphone: { screen: 0.78, top: 0.27, caption: 0.088 },
+    ipad: { screen: 0.74, top: 0.29, caption: 0.062 },
+  }[display]
+  const screenH = height * layout.screen
   const screenW = screenH * aspect
   return (
     <AbsoluteFill style={{ fontFamily: sans }}>
       <Backdrop />
       <div style={{ position: 'absolute', top: height * 0.055, left: width * 0.05, right: width * 0.05 }}>
-        <Headline top={top} bottom={bottom} size={width * 0.072} />
+        <Headline top={top} bottom={bottom} size={width * layout.caption} />
       </div>
-      <Device src={`duo/${display}-${shot}.jpg`} width={screenW} aspect={aspect} radius={screenW * 0.085} style={{ left: (width - screenW) / 2 - screenW * 0.028, top: height * 0.255 }} />
+      <Device src={`duo/${display}-${shot}.jpg`} width={screenW} aspect={aspect} radius={screenW * (display === 'ipad' ? 0.05 : display === 'iphone' ? 0.13 : 0.085)} style={{ left: (width - screenW) / 2 - screenW * 0.028, top: height * layout.top }} />
     </AbsoluteFill>
   )
 }
