@@ -41,8 +41,11 @@ async function renderChrome(route: RouteLocationNormalized) {
   await NativeNavigation.setNavbar({
     hidden: route.meta.navbar === false,
     title: route.meta.title ? t(route.meta.title as string) : '',
-    large: isRoot,
-    transparent: true,
+    // Compact bar with its glass background: pages scroll inside a web view the
+    // native bar can't observe, so a large title would never collapse and the
+    // content would slide under it.
+    large: false,
+    transparent: false,
     // Android has a native back arrow; the iOS text back button would be empty, so use a chevron item.
     backButton: { visible: isAndroid && !isRoot },
     leftItems: isRoot || isAndroid ? [] : [BACK_ITEM],
