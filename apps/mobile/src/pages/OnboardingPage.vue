@@ -75,15 +75,6 @@ onMounted(() => {
 <template>
   <PageShell :scroll="false">
     <div class="relative flex h-full flex-col bg-ink">
-      <button
-        v-if="step < STEPS - 1"
-        class="pressable absolute right-5 z-10 rounded-full px-3 py-1.5 text-sm font-semibold text-white/70"
-        :style="{ top: 'calc(var(--nav-top) + 10px)' }"
-        @click="finish"
-      >
-        {{ t('onboarding.skip') }}
-      </button>
-
       <div ref="pager" class="pager flex flex-1 snap-x snap-mandatory overflow-x-auto overflow-y-hidden" @scroll.passive="onScroll">
         <!-- 1. What BeWise is -->
         <section class="slide relative">
@@ -185,25 +176,31 @@ onMounted(() => {
         </section>
       </div>
 
-      <footer class="mx-auto flex w-full max-w-lg items-center gap-4 px-7 pt-3" :style="{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)' }">
-        <div class="flex gap-1.5" role="tablist">
-          <button
-            v-for="i in STEPS"
-            :key="i"
-            role="tab"
-            :aria-selected="step === i - 1"
-            :aria-label="`${i} / ${STEPS}`"
-            class="h-2 rounded-full transition-all duration-300"
-            :class="step === i - 1 ? 'w-6 bg-white' : 'w-2 bg-white/25'"
-            @click="goTo(i - 1)"
-          />
-        </div>
-        <div class="flex-1" />
-        <button class="pressable flex h-14 items-center gap-2 rounded-full bg-white px-7 font-semibold text-ink" @click="next">
-          {{ step === STEPS - 1 ? t('onboarding.start') : t('onboarding.next') }}
-          <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-        </button>
-      </footer>
+      <div class="nav-x">
+        <footer class="mx-auto flex w-full max-w-lg items-center gap-4 px-7 pt-3" :style="{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)' }">
+          <div class="flex gap-1.5" role="tablist">
+            <button
+              v-for="i in STEPS"
+              :key="i"
+              role="tab"
+              :aria-selected="step === i - 1"
+              :aria-label="`${i} / ${STEPS}`"
+              class="h-2 rounded-full transition-all duration-300"
+              :class="step === i - 1 ? 'w-6 bg-white' : 'w-2 bg-white/25'"
+              @click="goTo(i - 1)"
+            />
+          </div>
+          <div class="flex-1" />
+          <!-- Down here rather than in a top corner: iPhone Duo puts the status bar on a side edge. -->
+          <button v-if="step < STEPS - 1" class="pressable h-14 rounded-full px-3 text-sm font-semibold text-white/70" @click="finish">
+            {{ t('onboarding.skip') }}
+          </button>
+          <button class="pressable flex h-14 items-center gap-2 rounded-full bg-white px-7 font-semibold text-ink" @click="next">
+            {{ step === STEPS - 1 ? t('onboarding.start') : t('onboarding.next') }}
+            <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+          </button>
+        </footer>
+      </div>
     </div>
   </PageShell>
 </template>
@@ -229,6 +226,6 @@ onMounted(() => {
   min-height: 100%;
   max-width: 32rem;
   margin: 0 auto;
-  padding: calc(var(--nav-top) + 56px) 1.75rem 1rem;
+  padding: calc(var(--nav-top) + 56px) calc(var(--nav-right) + 1.75rem) 1rem calc(var(--nav-left) + 1.75rem);
 }
 </style>
