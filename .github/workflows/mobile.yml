@@ -166,7 +166,10 @@ jobs:
           notes=()
           for f in ../../store/metadata/*.json; do
             locale=$(basename "$f" .json)
-            [ "${{ matrix.platform }}" = "android" ] && [ "$locale" = "en-GB" ] && locale=en-US
+            # App Store locale codes; Play only gets the two it shares (en-GB -> en-US, fr-FR).
+            if [ "${{ matrix.platform }}" = "android" ]; then
+              case "$locale" in en-GB) locale=en-US ;; fr-FR) ;; *) continue ;; esac
+            fi
             notes+=(--store-release-notes-locale "$locale=$(jq -r .whatsNew "$f")")
           done
           bunx @capgo/cli@latest build request "$APP_ID" --platform ${{ matrix.platform }} --path . \

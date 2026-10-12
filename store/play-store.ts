@@ -2,7 +2,7 @@
 //
 //   PLAY_CONFIG_JSON=<service account json or base64> bun store/play-store.ts
 //
-// Writes store/metadata/play/<locale>.json and replaces phone screenshots
+// Writes every store/metadata/play/<locale>.json and replaces phone screenshots
 // (store/screenshots/android-<lang>/*.jpg), feature graphic and icon.
 import { createSign } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
@@ -56,7 +56,16 @@ async function commit(editUrl: string): Promise<string> {
   }
 }
 
-const LOCALES: Record<string, string> = { 'en-US': 'en', 'fr-FR': 'fr' }
+// Every store/metadata/play/<locale>.json is a listing. Graphics only exist in
+// English and French; other listings use the default language's graphics.
+// `--skip-media` updates text only.
+const MEDIA_LANG: Record<string, string> = { 'en-US': 'en', 'fr-FR': 'fr' }
+const LOCALES = Object.fromEntries(readdirSync(join(ROOT, 'metadata', 'play'))
+  .filter(f => f.endsWith('.json'))
+  .map(f => f.replace('.json', ''))
+  .sort()
+  .map(locale => [locale, MEDIA_LANG[locale]])) as Record<string, string | undefined>
+const skipMedia = process.argv.includes('--skip-media')
 const edit = await call(`${API}/edits`, 'POST')
 const e = `${API}/edits/${edit.id}`
 const u = `${UPLOAD}/edits/${edit.id}`
@@ -64,6 +73,10 @@ const u = `${UPLOAD}/edits/${edit.id}`
 for (const [locale, lang] of Object.entries(LOCALES)) {
   const meta = JSON.parse(readFileSync(join(ROOT, 'metadata', 'play', `${locale}.json`), 'utf8'))
   await call(`${e}/listings/${locale}`, 'PUT', { language: locale, title: meta.title, shortDescription: meta.shortDescription, fullDescription: meta.fullDescription })
+  if (!lang || skipMedia) {
+    console.log(`${locale}: listing updated`)
+    continue
+  }
 
   const images: [string, string[]][] = [
     ['phoneScreenshots', readdirSync(join(ROOT, 'screenshots', `android-${lang}`)).filter(f => f.endsWith('.jpg')).sort().map(f => join(ROOT, 'screenshots', `android-${lang}`, f))],

@@ -14,7 +14,7 @@ import process from 'node:process'
 
 const BUNDLE_ID = 'ee.forgr.bewise'
 const ROOT = new URL('.', import.meta.url).pathname
-const version = process.argv[2]
+const version = process.argv.slice(2).find(a => !a.startsWith('--'))
 if (!version)
   throw new Error('usage: bun store/app-store.ts <version>')
 
@@ -59,8 +59,16 @@ async function asc<T = any>(path: string, method = 'GET', body?: unknown): Promi
   return (text ? JSON.parse(text) : null) as T
 }
 
-// Locale folder -> screenshot language folder.
-const LOCALES: Record<string, string> = { 'en-GB': 'en', 'fr-FR': 'fr' }
+// Every store/metadata/<locale>.json is a localization. Media (screenshots,
+// preview, creative assets) only exist in English and French; other locales
+// fall back to the primary language's media. `--skip-media` updates text only.
+const MEDIA_LANG: Record<string, string> = { 'en-GB': 'en', 'fr-FR': 'fr' }
+const LOCALES = Object.fromEntries(readdirSync(join(ROOT, 'metadata'))
+  .filter(f => f.endsWith('.json'))
+  .map(f => f.replace('.json', ''))
+  .sort((a, b) => a === 'en-GB' ? -1 : b === 'en-GB' ? 1 : a.localeCompare(b))
+  .map(locale => [locale, MEDIA_LANG[locale]])) as Record<string, string | undefined>
+const skipMedia = process.argv.includes('--skip-media')
 // Screenshot set -> folders (prefix of store/screenshots/<prefix>-<lang>).
 // APP_IPHONE_DUO is not in Apple's OpenAPI yet but the API accepts it; one set
 // holds both the outer (1398x2034) and inner (2007x2853) display screenshots.
@@ -116,7 +124,9 @@ for (const [locale, lang] of Object.entries(LOCALES)) {
     supportUrl: meta.supportUrl,
     marketingUrl: meta.marketingUrl,
   }
+  // Creating the app info localization above also creates the version one, so re-read before creating.
   let loc = versionLocs.find((l: any) => l.attributes.locale === locale)
+    ?? (await asc(`/v1/appStoreVersions/${appVersion.id}/appStoreVersionLocalizations?limit=200`)).data.find((l: any) => l.attributes.locale === locale)
   if (loc) {
     await asc(`/v1/appStoreVersionLocalizations/${loc.id}`, 'PATCH', { data: { type: 'appStoreVersionLocalizations', id: loc.id, attributes: attrs } })
   }
@@ -124,6 +134,9 @@ for (const [locale, lang] of Object.entries(LOCALES)) {
     loc = (await asc('/v1/appStoreVersionLocalizations', 'POST', { data: { type: 'appStoreVersionLocalizations', attributes: { locale, ...attrs }, relationships: { appStoreVersion: { data: { type: 'appStoreVersions', id: appVersion.id } } } } })).data
   }
   console.log(`${locale}: metadata updated`)
+
+  if (!lang || skipMedia)
+    continue
 
   // 3. Screenshots: drop every inherited set, upload ours.
   const sets = (await asc(`/v1/appStoreVersionLocalizations/${loc.id}/appScreenshotSets?limit=50`)).data
