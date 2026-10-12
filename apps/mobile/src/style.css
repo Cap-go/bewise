@@ -74,6 +74,12 @@ cap-content {
   padding-bottom: calc(var(--nav-bottom) + 24px);
 }
 
+/* iOS large titles: keep the expanded title's height (96pt below the status bar)
+   so content does not jump when the title collapses on scroll. */
+.large-title .page-scroll {
+  padding-top: calc(max(var(--nav-top), calc(env(safe-area-inset-top) + 96px)) + 8px);
+}
+
 .page-scroll,
 .nav-x {
   padding-left: var(--nav-left);

@@ -33,24 +33,52 @@ function tabOf(route: RouteLocationNormalized): TabId {
   return (route.meta.tab as TabId | undefined) ?? 'today'
 }
 
-async function renderChrome(route: RouteLocationNormalized) {
-  const t = i18n.global.t
-  const tab = tabOf(route)
-  const isRoot = route.path === TABS.find(x => x.id === tab)?.path
+function isTabRoot(route: RouteLocationNormalized) {
+  return route.path === TABS.find(x => x.id === tabOf(route))?.path
+}
 
+/**
+ * iOS large title: big at the top of a tab page, collapsing into the small
+ * centered title once the page scrolls. Pages scroll inside the web view, which
+ * the native bar can't observe, so PageShell reports it via setTitleCollapsed().
+ */
+export function hasLargeTitle(route: RouteLocationNormalized) {
+  return isNative && !isAndroid && route.meta.navbar !== false && isTabRoot(route)
+}
+
+let titleCollapsed = false
+let currentRoute: RouteLocationNormalized | undefined
+
+export function setTitleCollapsed(collapsed: boolean) {
+  if (collapsed === titleCollapsed || !currentRoute || !hasLargeTitle(currentRoute))
+    return
+  titleCollapsed = collapsed
+  void renderNavbar(currentRoute, true)
+}
+
+async function renderNavbar(route: RouteLocationNormalized, animated = false) {
+  const t = i18n.global.t
+  const isRoot = isTabRoot(route)
   await NativeNavigation.setNavbar({
     hidden: route.meta.navbar === false,
     title: route.meta.title ? t(route.meta.title as string) : '',
-    // Compact bar with its glass background: pages scroll inside a web view the
-    // native bar can't observe, so a large title would never collapse and the
-    // content would slide under it.
-    large: false,
-    transparent: false,
+    large: hasLargeTitle(route) && !titleCollapsed,
+    animated,
     // Android has a native back arrow; the iOS text back button would be empty, so use a chevron item.
     backButton: { visible: isAndroid && !isRoot },
     leftItems: isRoot || isAndroid ? [] : [BACK_ITEM],
     colors: { tint: BRAND, foreground: '#ffffff', ...SURFACE },
   })
+}
+
+async function renderChrome(route: RouteLocationNormalized) {
+  const t = i18n.global.t
+  const tab = tabOf(route)
+  if (route.path !== currentRoute?.path)
+    titleCollapsed = false
+  currentRoute = route
+
+  await renderNavbar(route)
 
   await NativeNavigation.setTabbar({
     hidden: route.meta.tabbar === false,

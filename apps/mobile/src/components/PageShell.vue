@@ -3,15 +3,22 @@ import { Capacitor } from '@capacitor/core'
 import { setupPage } from '@capgo/capacitor-transitions/vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { isNative } from '~/lib/chrome'
+import { hasLargeTitle, isNative, setTitleCollapsed } from '~/lib/chrome'
 
 const props = defineProps<{ tab?: string, scroll?: boolean }>()
 const emit = defineEmits<{ enter: [] }>()
 const page = ref<HTMLElement | null>(null)
 const route = useRoute()
+const isAndroid = Capacitor.getPlatform() === 'android'
 // iOS 26+ draws the native nav bar with no background and relies on the scroll
 // view's edge effect, which a web page doesn't get: recreate it under the title.
-const navEdge = computed(() => isNative && Capacitor.getPlatform() === 'ios' && route.meta.navbar !== false)
+const navEdge = computed(() => isNative && !isAndroid && route.meta.navbar !== false)
+const largeTitle = computed(() => hasLargeTitle(route))
+
+function onScroll(event: Event) {
+  if (largeTitle.value)
+    setTitleCollapsed((event.target as HTMLElement).scrollTop > 36)
+}
 let cleanup: (() => void) | undefined
 
 onMounted(() => {
@@ -24,7 +31,7 @@ onUnmounted(() => cleanup?.())
 <template>
   <cap-page ref="page">
     <div v-if="navEdge" aria-hidden="true" class="nav-edge" />
-    <cap-content slot="content" fullscreen :scroll-y="props.scroll !== false" :data-tab-root="props.tab">
+    <cap-content slot="content" fullscreen :scroll-y="props.scroll !== false" :data-tab-root="props.tab" :class="{ 'large-title': largeTitle }" @scroll.passive="onScroll">
       <slot />
     </cap-content>
   </cap-page>
