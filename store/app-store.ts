@@ -167,7 +167,10 @@ for (const [locale, lang] of Object.entries(LOCALES)) {
     console.log(`${locale}: ${files.length} ${displayType} screenshots`)
   }
 
-  // 4. iPhone app preview (6.9" set, used for every iPhone size).
+  // 4. iPhone app preview (6.9" set, used for every iPhone size). Apple rejects
+  // previews that aren't full-screen screen captures (guideline 2.3.4: no device
+  // frames or framing around the capture; text overlays and narration are fine),
+  // so only put a raw simulator recording at store/previews/iphone.mp4.
   const preview = join(ROOT, 'previews', 'iphone.mp4')
   if (existsSync(preview)) {
     for (const set of (await asc(`/v1/appStoreVersionLocalizations/${loc.id}/appPreviewSets?limit=50`)).data)

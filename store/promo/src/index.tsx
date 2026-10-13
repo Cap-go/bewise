@@ -2,8 +2,9 @@ import { Composition, registerRoot } from 'remotion'
 import { DURATION, Promo } from './Promo'
 import { Creative, DUO_SIZES, DuoShot, LOOP, STILL_FRAME } from './Store'
 
-// App Store app preview: 6.9"/6.5" iPhone portrait size, 15-30 s, 30 fps.
-// Website: 16:9.
+// Portrait promo (social, website on phones) and 16:9 website cut. Not an App Store
+// app preview: Apple rejected it (guideline 2.3.4) because the app sits in a device
+// frame; previews must be full-screen screen captures.
 function Root() {
   return (
     <>
