@@ -1,38 +1,45 @@
+import { App as CapApp } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
+import { LocalNotifications } from '@capacitor/local-notifications'
+import { SplashScreen } from '@capacitor/splash-screen'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { initTransitions } from '@capgo/capacitor-transitions/vue'
 import { CapacitorUpdater } from '@capgo/capacitor-updater'
-import { createApp } from 'vue'
+import { createApp, watch } from 'vue'
 import pkg from '../package.json'
 import App from './App.vue'
 import { i18n, onLocaleChange, setLocale } from './i18n'
 import { loadCategories } from './lib/catalog'
-import { setupChrome } from './lib/chrome'
-import { scheduleReminder } from './lib/reminder'
-import { loadState, state } from './lib/state'
+import { setupChrome, switchTab } from './lib/chrome'
+import { refreshReminder } from './lib/reminder'
+import { trackFirstLaunch } from './lib/review'
+import { deviceLang, loadState, state } from './lib/state'
+import { refreshWidget } from './lib/widget'
 import { router } from './router'
 import '@capgo/capacitor-transitions'
 import './style.css'
 
 async function start() {
-  // Tell Capgo this bundle booted fine, otherwise it rolls back to the previous one.
-  void CapacitorUpdater.notifyAppReady().catch(() => {})
-  if (!Capacitor.isNativePlatform())
+  const native = Capacitor.isNativePlatform()
+  if (!native)
     document.documentElement.classList.add('web-chrome')
   else
     void StatusBar.setStyle({ style: Style.Dark }).catch(() => {})
 
   await loadState(pkg.version)
-  // Re-word the daily notification when the phone's language changed.
-  onLocaleChange((lang) => {
-    if (state.reminder && i18n.global.te('settings.notifTitle', lang) && localStorage.getItem('bewise.reminder.lang') !== lang) {
-      localStorage.setItem('bewise.reminder.lang', lang)
-      void scheduleReminder(state.reminderTime)
-    }
+  trackFirstLaunch()
+  // Translations arrived or the language changed: re-word the reminders and the widget label.
+  onLocaleChange(() => {
+    void refreshReminder()
+    refreshWidget()
   })
   // First launch in a new language: give the translation a moment before showing English.
   await Promise.race([setLocale(state.lang), new Promise(resolve => setTimeout(resolve, 1500))])
+  watch(() => state.lang, lang => void setLocale(lang))
   void loadCategories()
+  // Replaces the repeating alarm of older builds and keeps 30 days planned ahead.
+  void refreshReminder()
+  watch(() => state.reminderTime, () => void refreshReminder())
 
   // Store screenshot automation: `defaults write ee.forgr.bewise CapacitorStorage.bewise.route /archive`
   if (import.meta.env.VITE_SCREENSHOTS) {
@@ -47,6 +54,23 @@ async function start() {
   await router.isReady()
   app.mount('#app')
   await setupChrome(router)
+
+  if (native) {
+    // The phone's language can change while BeWise sits in the background.
+    void CapApp.addListener('resume', async () => {
+      state.lang = await deviceLang()
+    })
+    // Tapping the daily reminder opens today's quote, wherever the app was left.
+    void LocalNotifications.addListener('localNotificationActionPerformed', () => {
+      if (state.onboarded && router.currentRoute.value.path !== '/today')
+        void switchTab(router, '/today')
+    })
+  }
+
+  // Only now is this bundle known to start: Capgo rolls back an update that never gets here.
+  void CapacitorUpdater.notifyAppReady().catch(() => {})
+  // Pages hide the splash once their content is ready; never leave it up if one fails to.
+  setTimeout(() => void SplashScreen.hide({ fadeOutDuration: 250 }).catch(() => {}), 4000)
 }
 
 void start()

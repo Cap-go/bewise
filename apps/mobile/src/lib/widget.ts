@@ -10,6 +10,8 @@ import { state } from './state'
 const WIDGET_ID = 'bewise-daily'
 const WIDGET_KIND = 'BeWiseQuoteWidget'
 
+let lastQuote: Quote | undefined
+
 /**
  * Hand today's quote and the reader's preferences to the home/lock screen
  * widgets through Capgo Widget Kit's shared store, then refresh them.
@@ -17,6 +19,7 @@ const WIDGET_KIND = 'BeWiseQuoteWidget'
  * even when the app is not opened.
  */
 export async function syncWidget(quote: Quote) {
+  lastQuote = quote
   // Builds released before widgets shipped don't have the native plugin.
   if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('CapgoWidgetKit'))
     return
@@ -45,4 +48,10 @@ export async function syncWidget(quote: Quote) {
   catch (error) {
     console.warn('widget sync failed', error)
   }
+}
+
+/** Push the last quote again, e.g. once translations arrive so the widget's label follows the language. */
+export function refreshWidget() {
+  if (lastQuote)
+    void syncWidget(lastQuote)
 }

@@ -20,13 +20,15 @@ const SURFACE = isAndroid ? { background: '#0b1016' } : {}
 
 const BRAND = '#00c0ff'
 
-const BACK_ITEM = {
-  id: 'back',
-  title: 'Back',
-  icon: {
-    ios: { sfSymbol: 'chevron.backward' },
-    android: { svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>' },
-  },
+function backItem() {
+  return {
+    id: 'back',
+    title: i18n.global.t('common.back'),
+    icon: {
+      ios: { sfSymbol: 'chevron.backward' },
+      android: { svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>' },
+    },
+  }
 }
 
 function tabOf(route: RouteLocationNormalized): TabId {
@@ -66,7 +68,7 @@ async function renderNavbar(route: RouteLocationNormalized, animated = false) {
     animated,
     // Android has a native back arrow; the iOS text back button would be empty, so use a chevron item.
     backButton: { visible: isAndroid && !isRoot },
-    leftItems: isRoot || isAndroid ? [] : [BACK_ITEM],
+    leftItems: isRoot || isAndroid ? [] : [backItem()],
     colors: { tint: BRAND, foreground: '#ffffff', ...SURFACE },
   })
 }

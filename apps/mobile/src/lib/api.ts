@@ -36,11 +36,13 @@ function qs(params: Record<string, string | number | undefined>) {
 export const api = {
   today: (category: string, lang: string, date: string, user: string) =>
     request<Quote>(`/v1/quotes/today?${qs({ category, lang, date, user })}`),
-  archive: (category: string, lang: string, before: string, limit = 20) =>
-    request<Quote[]>(`/v1/quotes?${qs({ category, lang, before, limit })}`),
+  archive: (category: string, lang: string, before: string, q?: string, limit = 20) =>
+    request<Quote[]>(`/v1/quotes?${qs({ category, lang, before, q, limit })}`),
   quote: (id: string, lang: string, user: string) => request<Quote>(`/v1/quotes/${id}?${qs({ lang, user })}`),
   vote: (id: string, user: string) =>
     request<{ votes: number, voted: boolean }>(`/v1/quotes/${id}/vote`, { method: 'POST', body: JSON.stringify({ user }) }),
+  unvote: (id: string, user: string) =>
+    request<{ votes: number, voted: boolean }>(`/v1/quotes/${id}/vote`, { method: 'DELETE', body: JSON.stringify({ user }) }),
   categories: (lang: string) => request<Category[]>(`/v1/categories?${qs({ lang, v: 3 })}`),
   saveUser: (id: string, body: { category?: string, lang?: string, platform?: string, appVersion?: string }) =>
     request<{ ok: boolean }>(`/v1/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
@@ -69,6 +71,12 @@ export function photo(url: string | null | undefined, width: number, height?: nu
   catch {
     return url
   }
+}
+
+export function addDays(day: string, days: number): string {
+  const date = new Date(`${day}T12:00:00`)
+  date.setDate(date.getDate() + days)
+  return localDay(date)
 }
 
 export function localDay(date = new Date()): string {

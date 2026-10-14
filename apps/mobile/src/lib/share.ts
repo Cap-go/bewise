@@ -19,21 +19,39 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
+/** Words (or, for Chinese, Japanese, Thai..., word-like runs) with their trailing spaces. */
+function segments(text: string, granularity: 'word' | 'grapheme'): string[] {
+  if (typeof Intl.Segmenter === 'function')
+    return Array.from(new Intl.Segmenter(undefined, { granularity }).segment(text), s => s.segment)
+  return granularity === 'word' ? text.split(/(?<=\s)/) : Array.from(text)
+}
+
 function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
   const lines: string[] = []
+  const fits = (s: string) => ctx.measureText(s.trim()).width <= maxWidth
   let line = ''
-  for (const word of text.split(/\s+/)) {
-    const next = line ? `${line} ${word}` : word
-    if (ctx.measureText(next).width > maxWidth && line) {
-      lines.push(line)
-      line = word
+  for (const piece of segments(text, 'word')) {
+    if (fits(line + piece)) {
+      line += piece
+      continue
     }
-    else {
-      line = next
+    if (line.trim())
+      lines.push(line.trim())
+    line = piece.trimStart()
+    // A single run wider than the card (long word, unsegmented script): break between characters.
+    while (!fits(line)) {
+      let head = ''
+      for (const g of segments(line, 'grapheme')) {
+        if (!fits(head + g) && head)
+          break
+        head += g
+      }
+      lines.push(head.trim())
+      line = line.slice(head.length).trimStart()
     }
   }
-  if (line)
-    lines.push(line)
+  if (line.trim())
+    lines.push(line.trim())
   return lines
 }
 
@@ -86,21 +104,31 @@ export async function renderQuoteCard(quote: Quote): Promise<string> {
   const blockHeight = lines.length * lineHeight
   let y = (H - blockHeight) / 2 + size * 0.2
 
+  // Arabic, Hebrew...: the canvas is not in the page, so set the direction from the quote's script.
+  const rtl = /^\P{L}*[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFC]/u.test(quote.text)
+  const start = rtl ? W - padding : padding
+  ctx.direction = rtl ? 'rtl' : 'ltr'
+  ctx.textAlign = 'start'
+
   ctx.fillStyle = 'rgba(166,255,203,0.9)'
   ctx.font = `600 ${size * 2.2}px "Fraunces Variable", Georgia, serif`
-  ctx.fillText('“', padding - 8, y - size * 0.4)
+  ctx.fillText('“', start + (rtl ? 8 : -8), y - size * 0.4)
 
   ctx.fillStyle = '#ffffff'
   ctx.font = `500 ${size}px "Fraunces Variable", Georgia, serif`
   for (const line of lines) {
-    ctx.fillText(line, padding, y + size)
+    ctx.fillText(line, start, y + size)
     y += lineHeight
   }
 
   ctx.font = '600 32px "Inter Variable", system-ui, sans-serif'
   ctx.fillStyle = 'rgba(255,255,255,0.8)'
-  ctx.fillText(`— ${quote.author}`, padding, y + 64)
+  if (quote.author.trim())
+    ctx.fillText(`— ${quote.author.trim()}`, start, y + 64)
 
+  // The BeWise footer stays left to right.
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'left'
   ctx.font = '700 30px "Inter Variable", system-ui, sans-serif'
   ctx.fillStyle = 'rgba(255,255,255,0.9)'
   ctx.fillText('BeWise', padding, H - 80)

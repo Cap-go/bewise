@@ -4,6 +4,7 @@ import { Preferences } from '@capacitor/preferences'
 import { reactive, watch } from 'vue'
 import { normalizeLang } from '../../../translate/src/lang'
 import { api } from './api'
+import { readJSON } from './storage'
 
 export interface AppState {
   userId: string
@@ -17,7 +18,7 @@ export interface AppState {
 }
 
 /** WKWebView reports the app's own localization (English), not the phone's: ask the OS. */
-async function deviceLang(): Promise<string> {
+export async function deviceLang(): Promise<string> {
   const tag = await Device.getLanguageTag().then(r => r.value).catch(() => navigator.language)
   return normalizeLang(tag)
 }
@@ -42,7 +43,7 @@ function legacyState(): Partial<AppState> {
   const legacy: Partial<AppState> = {}
   try {
     const session = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'))
-    const id = session && JSON.parse(localStorage.getItem(session) ?? '{}')?.user?.id
+    const id = session && readJSON<{ user?: { id?: unknown } }>(session, {}).user?.id
     if (typeof id === 'string')
       legacy.userId = id
   }
@@ -54,8 +55,13 @@ function legacyState(): Partial<AppState> {
 }
 
 export async function loadState(appVersion: string) {
-  const { value } = await Preferences.get({ key: KEY })
-  const saved = value ? JSON.parse(value) as Partial<AppState> : legacyState()
+  const { value } = await Preferences.get({ key: KEY }).catch(() => ({ value: null }))
+  let saved: Partial<AppState> | undefined
+  try {
+    saved = value ? JSON.parse(value) as Partial<AppState> : undefined
+  }
+  catch {}
+  saved ??= legacyState()
   Object.assign(state, saved, { lang: await deviceLang() })
   if (!state.userId)
     state.userId = crypto.randomUUID()

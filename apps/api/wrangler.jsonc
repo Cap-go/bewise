@@ -8,6 +8,12 @@
   "routes": [{ "pattern": "api.bewise.love", "custom_domain": true }],
   "triggers": { "crons": ["5 0 * * *"] },
   "services": [{ "binding": "TRANSLATE", "service": "bewise-translate" }],
+  // Per client IP and Cloudflare location. Reads: endpoints that can translate;
+  // writes: votes and user settings. namespace_id must be unique in the account.
+  "ratelimits": [
+    { "name": "READ_LIMIT", "namespace_id": "2601", "simple": { "limit": 300, "period": 60 } },
+    { "name": "WRITE_LIMIT", "namespace_id": "2602", "simple": { "limit": 60, "period": 60 } }
+  ],
   "d1_databases": [
     {
       "binding": "DB",

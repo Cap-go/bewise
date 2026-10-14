@@ -1,4 +1,7 @@
 {
+  "common": {
+    "back": "Back"
+  },
   "tabs": {
     "today": "Today",
     "archive": "Archive",
@@ -9,7 +12,8 @@
     "eyebrow": "Quote of the day",
     "offline": "You're offline. Showing your last quote.",
     "error": "Couldn't load today's quote.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "offlineFirst": "You're offline. Here's a quote to start with."
   },
   "quote": {
     "share": "Share",
@@ -17,18 +21,30 @@
     "copied": "Quote copied",
     "love": "Love",
     "loved": "Loved",
-    "shareText": "“{text}” — {author}\n\nDaily wisdom with BeWise: https://bewise.love"
+    "shareText": "“{text}” — {author}\n\nDaily wisdom with BeWise: https://bewise.love",
+    "loveFailed": "Couldn't save. Check your connection.",
+    "error": "Couldn't load this quote."
   },
   "archive": {
     "title": "Archive",
     "subtitle": "Every past quote in {category}",
     "empty": "No quotes yet.",
-    "end": "You reached the beginning."
+    "end": "You reached the beginning.",
+    "lovedSubtitle": "Quotes you loved",
+    "all": "All",
+    "loved": "Loved",
+    "lovedEmpty": "Tap the heart on a quote to keep it here.",
+    "search": "Search quotes or authors",
+    "noResults": "No quotes match “{query}”.",
+    "jump": "Jump to a date",
+    "from": "From {date}",
+    "error": "Couldn't load quotes."
   },
   "explore": {
     "title": "Themes",
     "subtitle": "Pick what you need to hear each morning.",
-    "current": "Current"
+    "current": "Current",
+    "error": "Couldn't load themes. Showing the default list."
   },
   "settings": {
     "title": "Settings",

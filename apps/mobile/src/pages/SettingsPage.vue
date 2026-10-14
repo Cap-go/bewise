@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { App } from '@capacitor/app'
 import { Browser } from '@capacitor/browser'
 import { Clipboard } from '@capacitor/clipboard'
 import { Capacitor } from '@capacitor/core'
 import { Share } from '@capacitor/share'
 import { CapgoInAppReview } from '@capgo/capacitor-in-app-review'
 import { CapacitorUpdater } from '@capgo/capacitor-updater'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import PageShell from '~/components/PageShell.vue'
@@ -15,7 +16,8 @@ import SettingsRow from '~/components/SettingsRow.vue'
 import { API_URL } from '~/lib/api'
 import { push } from '~/lib/chrome'
 import { haptic, showToast } from '~/lib/feedback'
-import { cancelReminder, scheduleReminder } from '~/lib/reminder'
+import { cancelReminder, notificationsDenied, scheduleReminder } from '~/lib/reminder'
+import { STORE_URL } from '~/lib/review'
 import { state } from '~/lib/state'
 import pkg from '../../package.json'
 
@@ -23,6 +25,8 @@ const { t } = useI18n()
 const router = useRouter()
 const bundle = ref('')
 const isIos = Capacitor.getPlatform() === 'ios'
+/** Reminder is on in BeWise but notifications were turned off in system settings. */
+const blocked = ref(false)
 
 const icon = (body: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">${body}</svg>`
 const icons = {
@@ -44,14 +48,18 @@ async function toggleReminder() {
     return
   }
   state.reminder = await scheduleReminder(state.reminderTime)
+  blocked.value = false
   if (!state.reminder)
     showToast(t('settings.notifDenied'))
 }
 
-async function changeTime(event: Event) {
+// main.ts re-plans the reminders whenever the time changes.
+function changeTime(event: Event) {
   state.reminderTime = (event.target as HTMLInputElement).value || '08:00'
-  if (state.reminder)
-    await scheduleReminder(state.reminderTime)
+}
+
+async function checkBlocked() {
+  blocked.value = state.reminder && Capacitor.isNativePlatform() && await notificationsDenied()
 }
 
 async function copyKey() {
@@ -69,14 +77,18 @@ async function shortcut() {
 
 async function rate() {
   void haptic.tap()
-  await CapgoInAppReview.requestReview().catch(() => open('https://apps.apple.com/app/id1448918843?action=write-review'))
+  await CapgoInAppReview.requestReview().catch(() => open(STORE_URL))
 }
 
 async function shareApp() {
   await Share.share({ text: t('settings.shareAppText') }).catch(() => {})
 }
 
+const resume = App.addListener('resume', () => void checkBlocked())
+onUnmounted(() => void resume.then(h => h.remove()))
+
 onMounted(async () => {
+  void checkBlocked()
   try {
     const { bundle: current } = await CapacitorUpdater.current()
     bundle.value = ['builtin', pkg.version].includes(current.version) ? '' : current.version
@@ -90,15 +102,14 @@ onMounted(async () => {
     <div class="page-scroll mx-auto max-w-2xl space-y-7">
       <PageTitle :title="t('settings.title')" />
 
-      <SettingsGroup :title="t('settings.reminder')" :footer="t('settings.reminderDesc')">
-        <SettingsRow :label="t('settings.reminder')" @click="toggleReminder">
+      <SettingsGroup :title="t('settings.reminder')" :footer="blocked ? t('settings.notifDenied') : t('settings.reminderDesc')">
+        <SettingsRow :label="t('settings.reminder')" role="switch" :aria-checked="state.reminder" @click="toggleReminder">
           <span
-            role="switch"
-            :aria-checked="state.reminder"
-            class="relative h-[31px] w-[51px] rounded-full transition-colors"
-            :class="state.reminder ? 'bg-sky' : 'bg-white/15'"
+            aria-hidden="true"
+            class="relative h-[31px] w-[51px] shrink-0 rounded-full transition-colors"
+            :class="state.reminder ? (blocked ? 'bg-white/30' : 'bg-sky') : 'bg-white/15'"
           >
-            <span class="absolute top-[2px] left-[2px] size-[27px] rounded-full bg-white shadow transition-transform" :class="state.reminder ? 'translate-x-5' : ''" />
+            <span class="absolute start-[2px] top-[2px] size-[27px] rounded-full bg-white shadow transition-transform" :class="state.reminder ? 'translate-x-5 rtl:-translate-x-5' : ''" />
           </span>
         </SettingsRow>
         <label v-if="state.reminder" class="flex min-h-14 items-center px-4">

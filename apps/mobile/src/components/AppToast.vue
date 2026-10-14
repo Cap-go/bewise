@@ -14,7 +14,7 @@ import { toast } from '~/lib/feedback'
       :key="toast.id"
       role="status"
       class="fixed inset-x-0 z-[60] mx-auto w-max max-w-[85vw] rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink shadow-2xl"
-      :style="{ top: 'calc(env(safe-area-inset-top) + 12px)' }"
+      :style="{ top: 'calc(var(--nav-top) + 12px)' }"
     >
       {{ toast.text }}
     </div>

@@ -6,7 +6,8 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
-    "seed": "bun scripts/seed.ts"
+    "seed": "bun scripts/seed.ts",
+    "purge": "bun scripts/purge.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "latest",

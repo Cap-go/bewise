@@ -6,57 +6,127 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import PageShell from '~/components/PageShell.vue'
 import QuoteHero from '~/components/QuoteHero.vue'
-import { api, localDay } from '~/lib/api'
+import { addDays, api, localDay } from '~/lib/api'
+import { bundledQuote } from '~/lib/bundled'
 import { categoryName } from '~/lib/catalog'
+import { adoptVote } from '~/lib/loved'
+import { refreshReminder, rememberQuote } from '~/lib/reminder'
 import { state } from '~/lib/state'
+import { readJSON, writeJSON } from '~/lib/storage'
 import { syncWidget } from '~/lib/widget'
 
 const { t } = useI18n()
 const quote = ref<Quote | null>(null)
-const status = ref<'loading' | 'ready' | 'offline' | 'error'>('loading')
+/** offline: an older quote of this theme; first: the quote shipped with the app. */
+const status = ref<'loading' | 'ready' | 'offline' | 'first' | 'error'>('loading')
 const CACHE = 'bewise.today'
 
+let generation = 0
+let loadedDay = ''
+/** Theme and language of the quote on screen. */
+let shownScope = ''
+
 async function load() {
+  const current = ++generation
   const day = localDay()
-  const cacheKey = `${state.category}:${state.lang}:${day}`
-  const cached = JSON.parse(localStorage.getItem(CACHE) ?? 'null') as { key: string, quote: Quote } | null
-  if (cached?.key === cacheKey) {
+  const scope = `${state.category}:${state.lang}`
+  const cached = readJSON<{ key: string, quote: Quote } | null>(CACHE, null)
+  const sameScope = cached?.key.startsWith(`${scope}:`) ?? false
+  if (cached?.key === `${scope}:${day}`) {
     quote.value = cached.quote
+    shownScope = scope
     status.value = 'ready'
+  }
+  else if (quote.value && shownScope !== scope) {
+    // Never leave another theme's quote on screen while this one loads.
+    quote.value = null
+    status.value = 'loading'
   }
   try {
     const fresh = await api.today(state.category, state.lang, day, state.userId)
+    if (current !== generation)
+      return
     quote.value = fresh
+    shownScope = scope
     status.value = 'ready'
-    localStorage.setItem(CACHE, JSON.stringify({ key: cacheKey, quote: fresh }))
+    loadedDay = day
+    writeJSON(CACHE, { key: `${scope}:${day}`, quote: fresh })
+    adoptVote(fresh)
     void syncWidget(fresh)
+    void planReminder(fresh)
   }
   catch {
-    if (cached) {
-      quote.value ??= cached.quote
-      status.value = cached.key === cacheKey ? 'ready' : 'offline'
+    if (current !== generation)
+      return
+    if (cached && sameScope) {
+      quote.value = cached.quote
+      shownScope = scope
+      status.value = cached.key === `${scope}:${day}` ? 'ready' : 'offline'
+    }
+    else if (!localStorage.getItem(CACHE)) {
+      // First launch without network: start with the quote shipped in the app.
+      quote.value = bundledQuote(state.category, day)
+      shownScope = scope
+      status.value = 'first'
     }
     else {
+      quote.value = null
       status.value = 'error'
     }
   }
   finally {
-    void SplashScreen.hide({ fadeOutDuration: 250 }).catch(() => {})
+    if (current === generation)
+      void SplashScreen.hide({ fadeOutDuration: 250 }).catch(() => {})
   }
+}
+
+/** Put today's and tomorrow's quotes into the reminders, so the notification is the quote itself. */
+async function planReminder(today: Quote) {
+  if (!state.reminder)
+    return
+  let changed = rememberQuote(today)
+  try {
+    changed = rememberQuote(await api.today(state.category, state.lang, addDays(today.date, 1), state.userId)) || changed
+  }
+  catch {}
+  if (changed)
+    await refreshReminder()
 }
 
 watch(() => [state.category, state.lang], load)
 
-let lastDay = localDay()
-const resume = App.addListener('resume', () => {
-  if (localDay() !== lastDay) {
-    lastDay = localDay()
+// A new day while the app stays open, or coming back online after an offline start.
+let midnight: ReturnType<typeof setTimeout> | undefined
+function armMidnight() {
+  clearTimeout(midnight)
+  const next = new Date()
+  next.setHours(24, 0, 5, 0)
+  midnight = setTimeout(() => {
     void load()
-  }
-})
+    armMidnight()
+  }, next.getTime() - Date.now())
+}
 
-onMounted(load)
-onUnmounted(() => void resume.then(h => h.remove()))
+function refreshIfStale() {
+  if (loadedDay !== localDay() || status.value !== 'ready')
+    void load()
+}
+
+const resume = App.addListener('resume', () => {
+  armMidnight()
+  refreshIfStale()
+})
+window.addEventListener('online', refreshIfStale)
+
+onMounted(() => {
+  void load()
+  armMidnight()
+})
+onUnmounted(() => {
+  clearTimeout(midnight)
+  window.removeEventListener('online', refreshIfStale)
+  void resume.then(h => h.remove())
+})
 </script>
 
 <template>
@@ -80,13 +150,14 @@ onUnmounted(() => void resume.then(h => h.remove()))
         </div>
         <div v-else class="size-10 animate-spin rounded-full border-[3px] border-white/40 border-t-white" />
       </div>
-      <p
-        v-if="status === 'offline'"
+      <button
+        v-if="status === 'offline' || status === 'first'"
         class="absolute inset-x-6 rounded-2xl bg-black/60 px-4 py-2.5 text-center text-sm text-white backdrop-blur-md"
         :style="{ top: 'calc(var(--nav-top) + 70px)' }"
+        @click="load"
       >
-        {{ t('today.offline') }}
-      </p>
+        {{ status === 'first' ? t('today.offlineFirst') : t('today.offline') }}
+      </button>
     </div>
   </PageShell>
 </template>

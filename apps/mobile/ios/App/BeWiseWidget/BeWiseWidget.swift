@@ -18,6 +18,13 @@ struct StoredQuote: Codable, Hashable {
     var img: String?
 }
 
+/// A quote the widget fetched itself, tagged with the theme/language it was fetched for.
+struct FetchedQuote: Codable {
+    var category: String
+    var lang: String
+    var quote: StoredQuote
+}
+
 struct WidgetPrefs: Decodable {
     var apiUrl: String?
     var user: String?
@@ -34,6 +41,8 @@ struct QuoteEntry: TimelineEntry {
     let eyebrow: String
     let category: String
     let image: UIImage?
+    /// Today's quote for the reader's current theme/language (not a stale fallback).
+    var isCurrent = false
 }
 
 private enum Copy {
@@ -64,9 +73,8 @@ struct QuoteProvider: TimelineProvider {
             let entry = await loadEntry(family: context.family, fetchIfStale: true)
             let calendar = Calendar.current
             let tomorrow = calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: Date())!)
-            // A quote from another day means the fetch failed: try again soon.
-            let isFresh = entry.quote.date == Self.localDay(Date())
-            let next = isFresh ? tomorrow.addingTimeInterval(60) : Date().addingTimeInterval(30 * 60)
+            // A stale fallback means the fetch failed: try again soon.
+            let next = entry.isCurrent ? tomorrow.addingTimeInterval(60) : Date().addingTimeInterval(30 * 60)
             completion(Timeline(entries: [entry], policy: .after(next)))
         }
     }
@@ -74,11 +82,23 @@ struct QuoteProvider: TimelineProvider {
     func loadEntry(family: WidgetFamily, fetchIfStale: Bool) async -> QuoteEntry {
         let prefs = Self.readPrefs()
         let lang = prefs?.lang ?? Self.deviceLang()
+        let category = prefs?.category ?? "inspire"
         let today = Self.localDay(Date())
-        var quote = prefs?.quote ?? Copy.sample
 
-        if fetchIfStale, quote.date != today, let fresh = await Self.fetchToday(prefs: prefs, lang: lang, day: today) {
+        // Newest quote for the current theme/language: the app's copy always belongs to
+        // them, our own fetch only if it was made for them. Ties keep the app's copy.
+        let fetched = Self.readFetched()
+        let ownMatch = fetched.flatMap { $0.category == category && $0.lang == lang ? $0.quote : nil }
+        let best = [prefs?.quote, ownMatch].compactMap { $0 }.max { $0.date < $1.date }
+        // Another theme/language only shows when nothing matches, until a fetch succeeds.
+        var quote = best ?? fetched?.quote ?? Copy.sample
+        var isCurrent = best?.date == today
+
+        if fetchIfStale, !isCurrent,
+           let fresh = await Self.fetchToday(prefs: prefs, category: category, lang: lang, day: today) {
+            Self.saveFetched(FetchedQuote(category: category, lang: lang, quote: fresh))
             quote = fresh
+            isCurrent = fresh.date == today
         }
 
         let image: UIImage?
@@ -94,7 +114,8 @@ struct QuoteProvider: TimelineProvider {
             quote: quote,
             eyebrow: prefs?.eyebrow ?? Copy.eyebrow[lang] ?? Copy.eyebrow["en"]!,
             category: prefs?.categoryName ?? "",
-            image: image
+            image: image,
+            isCurrent: isCurrent
         )
     }
 
@@ -106,10 +127,31 @@ struct QuoteProvider: TimelineProvider {
         return try? JSONDecoder().decode(WidgetPrefs.self, from: session.stateData)
     }
 
-    private static func fetchToday(prefs: WidgetPrefs?, lang: String, day: String) async -> StoredQuote? {
+    /// The widget's own fetches live next to the app's copy in the App Group store,
+    /// so a failed fetch tomorrow falls back to today's fetch, not the app's older copy.
+    private static let fetchedKey = "bewise.widget.fetched-quote"
+
+    private static var sharedDefaults: UserDefaults {
+        (try? CapgoWidgetKitSharedStore.defaults()) ?? .standard
+    }
+
+    private static func readFetched() -> FetchedQuote? {
+        guard let data = sharedDefaults.data(forKey: fetchedKey) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(FetchedQuote.self, from: data)
+    }
+
+    private static func saveFetched(_ fetched: FetchedQuote) {
+        if let data = try? JSONEncoder().encode(fetched) {
+            sharedDefaults.set(data, forKey: fetchedKey)
+        }
+    }
+
+    private static func fetchToday(prefs: WidgetPrefs?, category: String, lang: String, day: String) async -> StoredQuote? {
         var components = URLComponents(string: "\(prefs?.apiUrl ?? "https://api.bewise.love")/v1/quotes/today")
         components?.queryItems = [
-            URLQueryItem(name: "category", value: prefs?.category ?? "inspire"),
+            URLQueryItem(name: "category", value: category),
             URLQueryItem(name: "lang", value: lang),
             URLQueryItem(name: "date", value: day),
         ] + (prefs?.user.map { [URLQueryItem(name: "user", value: $0)] } ?? [])

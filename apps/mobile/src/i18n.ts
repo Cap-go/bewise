@@ -1,5 +1,6 @@
 import { createI18n } from 'vue-i18n'
 import { API_URL } from './lib/api'
+import { readJSON, writeJSON } from './lib/storage'
 import en from './locales/en.json'
 
 // The app ships English only. Any other language is translated by the API
@@ -32,12 +33,16 @@ export function onLocaleChange(fn: (lang: string) => void) {
 
 const RTL = /^(?:ar|he|fa|ur|ps|sd|ug|yi|dv|ckb)\b/
 
+export function isRtl(lang = i18n.global.locale.value): boolean {
+  return RTL.test(lang)
+}
+
 function apply(lang: string, messages?: Messages) {
   if (messages)
     i18n.global.setLocaleMessage(lang, messages)
   i18n.global.locale.value = lang
   document.documentElement.lang = lang
-  document.documentElement.dir = RTL.test(lang) ? 'rtl' : 'ltr'
+  document.documentElement.dir = isRtl(lang) ? 'rtl' : 'ltr'
   listeners.forEach(fn => fn(lang))
 }
 
@@ -55,7 +60,7 @@ export async function setLocale(lang: string) {
   if (lang === 'en')
     return apply('en')
   const key = `bewise.i18n.${lang}`
-  const cached = JSON.parse(localStorage.getItem(key) ?? 'null') as { hash: string, messages: Messages } | null
+  const cached = readJSON<{ hash: string, messages: Messages } | null>(key, null)
   if (cached)
     apply(lang, cached.messages)
   if (cached?.hash === SOURCE_HASH)
@@ -64,11 +69,12 @@ export async function setLocale(lang: string) {
     const res = await fetch(`${API_URL}/v1/i18n/${encodeURIComponent(lang)}?v=${SOURCE_HASH}`)
     if (!res.ok)
       throw new Error(String(res.status))
-    const { messages } = await res.json() as { messages: Messages }
+    const { messages, complete } = await res.json() as { messages: Messages, complete?: boolean }
     apply(lang, messages)
-    // Keep partial answers (API older than this bundle) out of the cache so they get fetched again.
-    if (covers(messages, en))
-      localStorage.setItem(key, JSON.stringify({ hash: SOURCE_HASH, messages }))
+    // Partial answers (an API older than this bundle, or strings the model failed
+    // on and sent in English) still show at once next launch, but get fetched again.
+    const whole = complete !== false && covers(messages, en)
+    writeJSON(key, { hash: whole ? SOURCE_HASH : 'partial', messages })
   }
   catch (error) {
     console.warn('translations unavailable', lang, error)

@@ -1,5 +1,6 @@
 package ee.forgr.bewise;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -27,7 +28,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,25 +43,46 @@ import org.json.JSONObject;
  * The app writes today's quote and the reader's theme/language into the Capgo
  * Widget Kit shared store (src/lib/widget.ts) and asks for a reload. On other
  * days the widget fetches the quote itself, so it stays current without
- * opening the app.
+ * opening the app. An inexact alarm right after local midnight swaps in the
+ * new day's quote instead of waiting for the next 3h update.
  */
 public class QuoteWidgetProvider extends AppWidgetProvider {
 
     private static final String SESSION_ID = "bewise-daily";
     private static final String CACHE_PREFS = "bewise_widget";
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final String ACTION_REFRESH = "ee.forgr.bewise.widget.REFRESH";
+    /** Broadcasts that re-render every widget: app sync, our midnight alarm, and clock/zone changes. */
+    private static final List<String> REFRESH_ACTIONS = Arrays.asList(
+        CapgoWidgetKitConstants.ACTION_NATIVE_WIDGET_BRIDGE_CHANGED,
+        ACTION_REFRESH,
+        Intent.ACTION_TIMEZONE_CHANGED,
+        Intent.ACTION_TIME_CHANGED,
+        Intent.ACTION_DATE_CHANGED
+    );
+    /** Retry a failed fetch after this long instead of waiting for midnight. */
+    private static final long RETRY_MS = 30 * 60 * 1000L;
+    private static final long ALARM_WINDOW_MS = 10 * 60 * 1000L;
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        if (CapgoWidgetKitConstants.ACTION_NATIVE_WIDGET_BRIDGE_CHANGED.equals(intent.getAction())) {
+        if (REFRESH_ACTIONS.contains(intent.getAction())) {
             final AppWidgetManager manager = AppWidgetManager.getInstance(context);
             final int[] ids = manager.getAppWidgetIds(new ComponentName(context, QuoteWidgetProvider.class));
             if (ids.length > 0) {
                 onUpdate(context, manager, ids);
+            } else {
+                cancelRefresh(context);
             }
             return;
         }
         super.onReceive(context, intent);
+    }
+
+    @Override
+    public void onDisabled(final Context context) {
+        cancelRefresh(context);
+        super.onDisabled(context);
     }
 
     @Override
@@ -80,24 +105,29 @@ public class QuoteWidgetProvider extends AppWidgetProvider {
     private static void render(final Context context, final AppWidgetManager manager, final int[] ids) {
         final JSONObject prefs = readPrefs(context);
         final String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
-        JSONObject quote = prefs != null ? prefs.optJSONObject("quote") : null;
+        final String category = category(prefs);
+        final String lang = lang(prefs);
 
-        // Prefer the app's copy, then our own cached fetch, then the network.
+        // Newest quote for the current theme/language: the app's copy always belongs to
+        // them, our own cached fetch only if it was made for them. Ties keep the app's copy.
         final SharedPreferences cache = context.getSharedPreferences(CACHE_PREFS, Context.MODE_PRIVATE);
-        if (quote == null || !today.equals(quote.optString("date"))) {
-            final JSONObject cached = parse(cache.getString("quote", null));
-            if (cached != null && today.equals(cached.optString("date")) && sameSource(cached, prefs)) {
-                quote = cached;
-            } else {
-                final JSONObject fresh = fetchToday(prefs, today);
-                if (fresh != null) {
-                    quote = fresh;
-                    cache.edit().putString("quote", fresh.toString()).apply();
-                } else if (quote == null) {
-                    quote = cached;
-                }
+        final JSONObject cached = parse(cache.getString("quote", null));
+        final JSONObject best = newer(
+            prefs != null ? prefs.optJSONObject("quote") : null,
+            cached != null && category.equals(cached.optString("category")) && lang.equals(cached.optString("lang")) ? cached : null
+        );
+        // Another theme/language only shows when nothing matches, until a fetch succeeds.
+        JSONObject quote = best != null ? best : cached;
+        boolean current = best != null && today.equals(best.optString("date"));
+        if (!current) {
+            final JSONObject fresh = fetchToday(prefs, category, lang, today);
+            if (fresh != null) {
+                quote = fresh;
+                current = today.equals(fresh.optString("date"));
+                cache.edit().putString("quote", fresh.toString()).apply();
             }
         }
+        scheduleRefresh(context, current);
 
         final Bitmap photo = quote != null ? loadPhoto(quote.optString("img", "")) : null;
         final String eyebrow = prefs != null && !prefs.optString("eyebrow").isEmpty()
@@ -176,15 +206,60 @@ public class QuoteWidgetProvider extends AppWidgetProvider {
         }
     }
 
-    private static boolean sameSource(final JSONObject cached, final JSONObject prefs) {
-        return prefs == null || (prefs.optString("category").equals(cached.optString("category")) && prefs.optString("lang").equals(cached.optString("lang")));
+    private static String category(final JSONObject prefs) {
+        return prefs != null ? prefs.optString("category", "inspire") : "inspire";
     }
 
-    private static JSONObject fetchToday(final JSONObject prefs, final String day) {
+    private static String lang(final JSONObject prefs) {
+        return prefs != null ? prefs.optString("lang", deviceLang()) : deviceLang();
+    }
+
+    /** The quote with the later day (dates are yyyy-MM-dd); {@code a} wins ties. */
+    private static JSONObject newer(final JSONObject a, final JSONObject b) {
+        if (a == null || b == null) {
+            return a != null ? a : b;
+        }
+        return b.optString("date").compareTo(a.optString("date")) > 0 ? b : a;
+    }
+
+    /**
+     * Wake the widget just after the next local midnight, or sooner to retry when today's quote
+     * could not be loaded. Inexact and non-waking: no exact-alarm permission, and a sleeping phone
+     * gets the update when it wakes, which is when the widget can be seen anyway.
+     */
+    private static void scheduleRefresh(final Context context, final boolean current) {
+        final AlarmManager alarms = context.getSystemService(AlarmManager.class);
+        if (alarms == null) {
+            return;
+        }
+        final Calendar midnight = Calendar.getInstance();
+        midnight.add(Calendar.DAY_OF_YEAR, 1);
+        midnight.set(Calendar.HOUR_OF_DAY, 0);
+        midnight.set(Calendar.MINUTE, 1);
+        midnight.set(Calendar.SECOND, 0);
+        midnight.set(Calendar.MILLISECOND, 0);
+        long at = midnight.getTimeInMillis();
+        if (!current) {
+            at = Math.min(at, System.currentTimeMillis() + RETRY_MS);
+        }
+        alarms.setWindow(AlarmManager.RTC, at, ALARM_WINDOW_MS, refreshIntent(context));
+    }
+
+    private static void cancelRefresh(final Context context) {
+        final AlarmManager alarms = context.getSystemService(AlarmManager.class);
+        if (alarms != null) {
+            alarms.cancel(refreshIntent(context));
+        }
+    }
+
+    private static PendingIntent refreshIntent(final Context context) {
+        final Intent intent = new Intent(context, QuoteWidgetProvider.class).setAction(ACTION_REFRESH);
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private static JSONObject fetchToday(final JSONObject prefs, final String category, final String lang, final String day) {
         try {
             final String api = prefs != null ? prefs.optString("apiUrl", "https://api.bewise.love") : "https://api.bewise.love";
-            final String category = prefs != null ? prefs.optString("category", "inspire") : "inspire";
-            final String lang = prefs != null ? prefs.optString("lang", deviceLang()) : deviceLang();
             final String user = prefs != null ? prefs.optString("user", "") : "";
             String url = api + "/v1/quotes/today?category=" + enc(category) + "&lang=" + enc(lang) + "&date=" + day;
             if (!user.isEmpty()) {
@@ -211,7 +286,7 @@ public class QuoteWidgetProvider extends AppWidgetProvider {
             if (uri.getHost() != null && uri.getHost().endsWith("unsplash.com")) {
                 final Uri.Builder builder = uri.buildUpon().clearQuery();
                 for (final String name : uri.getQueryParameterNames()) {
-                    if (!java.util.Arrays.asList("w", "h", "fit", "fm", "q", "auto").contains(name)) {
+                    if (!Arrays.asList("w", "h", "fit", "fm", "q", "auto").contains(name)) {
                         builder.appendQueryParameter(name, uri.getQueryParameter(name));
                     }
                 }
@@ -264,6 +339,6 @@ public class QuoteWidgetProvider extends AppWidgetProvider {
 
     private static String deviceLang() {
         final String lang = Locale.getDefault().getLanguage();
-        return java.util.Arrays.asList("en", "fr", "es", "de", "it").contains(lang) ? lang : "en";
+        return Arrays.asList("en", "fr", "es", "de", "it").contains(lang) ? lang : "en";
     }
 }

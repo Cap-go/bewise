@@ -1,11 +1,11 @@
 import type { Kind } from './lang'
 import { WorkerEntrypoint } from 'cloudflare:workers'
-import { cacheKey, languageName, normalizeLang } from './lang'
+import { cacheKey, languageName, machineTranslated, normalizeLang, REVISION, SEEDED_LANGS } from './lang'
 
 // BeWise stores English only. This worker translates quotes, theme names and
-// app strings into any language on demand with Workers AI, and caches every
-// string in KV forever, so each text is translated once per language.
-// It has no public route: bewise-api calls it through a service binding.
+// app strings into the languages of MACHINE_LANGS on demand with Workers AI,
+// and caches every string in KV forever, so each text is translated once per
+// language. It has no public route: bewise-api calls it through a service binding.
 
 interface Env {
   AI: Ai
@@ -17,8 +17,35 @@ interface Env {
 const BATCH: Record<Kind, number> = { quote: 5, category: 20, ui: 20 }
 const MAX_TEXTS = 100
 const MAX_LENGTH = 2000
+/** Model calls in flight per request. */
+const CONCURRENCY = 4
 /** Seconds before retrying a text the model failed to translate. */
-const RETRY_AFTER = 86400
+const RETRY_AFTER = 3600
+
+/** Milliseconds a request waits for a translation another request of the isolate is making. */
+const JOIN_TIMEOUT = 30_000
+
+/** Translations being made in this isolate, by cache key: concurrent requests share them. */
+const inflight = new Map<string, { since: number, value: Promise<string | null> }>()
+
+/** The pending translation of `key`, unless its request vanished (cancelled requests never settle). */
+function pending(key: string): Promise<string | null> | undefined {
+  const entry = inflight.get(key)
+  if (!entry || Date.now() - entry.since > JOIN_TIMEOUT)
+    return undefined
+  let timer: number | null = null
+  const timeout = new Promise<null>(resolve => timer = setTimeout(resolve, JOIN_TIMEOUT, null))
+  return Promise.race([entry.value, timeout]).finally(() => clearTimeout(timer))
+}
+
+/** Run `task` over `items`, at most `size` at a time. */
+async function pool<T>(items: T[], size: number, task: (item: T) => Promise<void>) {
+  let next = 0
+  await Promise.all(Array.from({ length: Math.min(size, items.length) }, async () => {
+    while (next < items.length)
+      await task(items[next++])
+  }))
+}
 
 const INSTRUCTIONS: Record<Kind, string> = {
   quote: 'Each item is a famous quote shown in BeWise, a daily wisdom app. Render it the way a published translation reads: faithful meaning, natural phrasing, same tone and rhythm. When a well-known translation of the quote exists in the target language, use it. Do not add quotation marks, notes, or the author name.',
@@ -27,6 +54,12 @@ const INSTRUCTIONS: Record<Kind, string> = {
 }
 
 interface Source { text: string, context?: string }
+
+export interface Translation {
+  texts: string[]
+  /** Per text: false when English came back because the translation failed (retried later). */
+  translated: boolean[]
+}
 
 const PLACEHOLDER_RE = /\{\w+\}/g
 // Writing systems of languages whose script code covers several Unicode scripts.
@@ -103,35 +136,90 @@ export default class Translate extends WorkerEntrypoint<Env> {
    * `contexts` optionally tells the model where each text appears (e.g. "tabs.archive").
    */
   async translate(texts: string[], lang: string, kind: Kind = 'ui', contexts: string[] = []): Promise<string[]> {
+    return (await this.translateWithStatus(texts, lang, kind, contexts)).texts
+  }
+
+  /**
+   * Same as `translate`, and tells which texts really got translated, so
+   * callers don't cache English fallbacks. Texts that need no translation
+   * (English, empty or too long) and languages outside MACHINE_LANGS count as
+   * translated: retrying would not change them.
+   */
+  async translateWithStatus(texts: string[], lang: string, kind: Kind = 'ui', contexts: string[] = []): Promise<Translation> {
     const target = normalizeLang(lang)
-    if (target === 'en' || texts.length === 0)
-      return texts
+    if (!machineTranslated(target) || texts.length === 0)
+      return { texts, translated: texts.map(() => true) }
     if (texts.length > MAX_TEXTS)
       throw new Error(`at most ${MAX_TEXTS} texts per call`)
 
     const unique = [...new Set(texts.filter(t => t.trim() && t.length <= MAX_LENGTH))]
     const contextOf = new Map(texts.map((t, i) => [t, contexts[i]]))
     const keys = await Promise.all(unique.map(t => cacheKey(kind, target, t)))
-    const cached = await Promise.all(keys.map(k => this.env.TRANSLATIONS.get(k, { cacheTtl: 3600 })))
+    const cached = await Promise.all(unique.map((t, i) => this.cached(keys[i], kind, target, t)))
     const found = new Map<string, string>()
+    const failed = new Set<string>()
     const missing: number[] = []
     // An empty value marks a recent failure: serve English until it expires.
-    cached.forEach((value, i) => value === null ? missing.push(i) : value && found.set(unique[i], value))
+    cached.forEach((value, i) => value === null ? missing.push(i) : value ? found.set(unique[i], value) : failed.add(unique[i]))
+
+    // Join the translations other requests of this isolate are already making.
+    const own: number[] = []
+    const joined: Promise<void>[] = []
+    const mine = new Map<number, { value: Promise<string | null>, resolve: (value: string | null) => void }>()
+    for (const i of missing) {
+      const shared = pending(keys[i])
+      if (shared) {
+        joined.push(shared.then(value => void (value ? found.set(unique[i], value) : failed.add(unique[i]))))
+        continue
+      }
+      let resolve: (value: string | null) => void = () => {}
+      const value = new Promise<string | null>(done => resolve = done)
+      own.push(i)
+      mine.set(i, { value, resolve })
+      inflight.set(keys[i], { since: Date.now(), value })
+    }
 
     const batches: number[][] = []
-    for (let start = 0; start < missing.length; start += BATCH[kind])
-      batches.push(missing.slice(start, start + BATCH[kind]))
-    await Promise.all(batches.map(async (batch) => {
-      const translated = await this.translateBatch(batch.map(i => ({ text: unique[i], context: contextOf.get(unique[i]) })), target, kind)
-      await Promise.all(batch.map(async (i, j) => {
-        const value = translated[j]
-        if (value === null)
-          return this.env.TRANSLATIONS.put(keys[i], '', { expirationTtl: RETRY_AFTER })
-        found.set(unique[i], value)
-        await this.env.TRANSLATIONS.put(keys[i], value)
-      }))
-    }))
-    return texts.map(t => found.get(t) ?? t)
+    for (let start = 0; start < own.length; start += BATCH[kind])
+      batches.push(own.slice(start, start + BATCH[kind]))
+    const done = pool(batches, CONCURRENCY, async (batch) => {
+      let translated: (string | null)[] = batch.map(() => null)
+      try {
+        translated = await this.translateBatch(batch.map(i => ({ text: unique[i], context: contextOf.get(unique[i]) })), target, kind)
+        await Promise.all(batch.map(async (i, j) => {
+          const value = translated[j]
+          if (value === null)
+            return this.env.TRANSLATIONS.put(keys[i], '', { expirationTtl: RETRY_AFTER })
+          await this.env.TRANSLATIONS.put(keys[i], value)
+        }))
+      }
+      catch (error) {
+        console.warn('translation batch failed', { lang: target, kind, error: String(error) })
+      }
+      finally {
+        batch.forEach((i, j) => {
+          const value = translated[j]
+          value ? found.set(unique[i], value) : failed.add(unique[i])
+          if (inflight.get(keys[i])?.value === mine.get(i)?.value)
+            inflight.delete(keys[i])
+          mine.get(i)?.resolve(value)
+        })
+      }
+    })
+    await Promise.all([done, ...joined])
+    return {
+      texts: texts.map(t => found.get(t) ?? t),
+      translated: texts.map(t => !failed.has(t)),
+    }
+  }
+
+  /** Cached translation: a string, '' for a recent failure, null when never translated. */
+  private async cached(key: string, kind: Kind, lang: string, text: string): Promise<string | null> {
+    const value = await this.env.TRANSLATIONS.get(key, { cacheTtl: 3600 })
+    if (value !== null || REVISION[kind] === 1 || !SEEDED_LANGS.has(lang))
+      return value
+    // Human translations of the old app stay at revision 1.
+    return this.env.TRANSLATIONS.get(await cacheKey(kind, lang, text, 1), { cacheTtl: 3600 })
   }
 
   /** One model call for the batch; failed items are retried one by one. */

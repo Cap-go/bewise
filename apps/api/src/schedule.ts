@@ -58,12 +58,43 @@ export async function scheduleCategoryDay(db: D1Database, categoryId: string, da
   if (!source)
     return false
 
-  await db
-    .prepare(`
-      INSERT OR IGNORE INTO quotes (id, category_id, lang, date, text, author, img, tags, total_votes, source_date)
-      SELECT lower(hex(randomblob(16))), category_id, lang, ?3, text, author, img, tags, 0, date
+  // The rerun keeps the hearts its text already received.
+  const id = crypto.randomUUID().replaceAll('-', '')
+  await db.batch([
+    db.prepare(`
+      INSERT OR IGNORE INTO quotes (id, category_id, lang, date, text, author, img, tags, total_votes, legacy_votes, source_date)
+      SELECT ?4, category_id, lang, ?3, text, author, img, tags, 0, 0, date
       FROM quotes WHERE category_id = ?1 AND lang = 'en' AND date = ?2`)
-    .bind(categoryId, source.date, day)
-    .run()
+      .bind(categoryId, source.date, day, id),
+    ...inheritVotes(db, id),
+  ])
   return true
+}
+
+/**
+ * Give a rerun the hearts of every earlier day of its text: the users who
+ * loved it (so they see it loved) and the anonymous legacy count.
+ * Same rules as migrations/0005_rerun_votes.sql.
+ */
+export function inheritVotes(db: D1Database, id: string): D1PreparedStatement[] {
+  return [
+    db.prepare(`
+      INSERT OR IGNORE INTO votes (quote_id, user_id, created_at)
+      SELECT r.id, v.user_id, min(v.created_at) FROM quotes r
+      JOIN quotes o ON o.category_id = r.category_id AND o.lang = r.lang AND o.text = r.text AND o.date < r.date
+      JOIN votes v ON v.quote_id = o.id
+      WHERE r.id = ?1
+      GROUP BY v.user_id`).bind(id),
+    db.prepare(`
+      UPDATE quotes SET legacy_votes = max(legacy_votes, (
+        SELECT coalesce(max(o.legacy_votes), 0) FROM quotes o
+        WHERE o.category_id = quotes.category_id AND o.lang = quotes.lang AND o.text = quotes.text AND o.date < quotes.date
+      )) WHERE id = ?1`).bind(id),
+    countVotes(db, id),
+  ]
+}
+
+/** Recount a quote's hearts after its votes changed. */
+export function countVotes(db: D1Database, id: string): D1PreparedStatement {
+  return db.prepare('UPDATE quotes SET total_votes = legacy_votes + (SELECT count(*) FROM votes WHERE quote_id = ?1) WHERE id = ?1').bind(id)
 }
