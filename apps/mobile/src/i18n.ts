@@ -69,11 +69,11 @@ export async function setLocale(lang: string) {
     const res = await fetch(`${API_URL}/v1/i18n/${encodeURIComponent(lang)}?v=${SOURCE_HASH}`)
     if (!res.ok)
       throw new Error(String(res.status))
-    const { messages, complete } = await res.json() as { messages: Messages, complete?: boolean }
+    const { messages, complete, hash } = await res.json() as { messages: Messages, complete?: boolean, hash?: string }
     apply(lang, messages)
     // Partial answers (an API older than this bundle, or strings the model failed
     // on and sent in English) still show at once next launch, but get fetched again.
-    const whole = complete !== false && covers(messages, en)
+    const whole = complete !== false && (hash ? hash === SOURCE_HASH : covers(messages, en))
     writeJSON(key, { hash: whole ? SOURCE_HASH : 'partial', messages })
   }
   catch (error) {

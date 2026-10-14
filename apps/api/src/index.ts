@@ -229,6 +229,14 @@ app.get('/v1/categories', edgeCache('bewise-categories', 3600), reads, async (c)
   return c.json(results.map((row, i) => ({ id: row.id, name: names.texts[i], img: row.img })))
 })
 
+/** Same hash as the app's SOURCE_HASH (apps/mobile/src/i18n.ts): which en.json this Worker serves. */
+const SOURCE_HASH = (() => {
+  let h = 5381
+  for (const ch of JSON.stringify(messages))
+    h = Math.imul(h, 33) ^ ch.charCodeAt(0)
+  return (h >>> 0).toString(36)
+})()
+
 // App strings for any language, translated from the English source of the app.
 // `complete: false` means some strings are English fallbacks of a failed
 // translation: the response is not cached anywhere, so asking again retries.
@@ -239,7 +247,9 @@ app.get('/v1/i18n/:lang', edgeCache('bewise-i18n', 86400), reads, async (c) => {
   const english = strings.map(([, text]) => text)
   const translated = await translate(c.env, english, lang, 'ui', strings.map(([key]) => key))
   const values = lang === 'en' ? english : translated.texts.map(escapeMessage)
-  return c.json({ lang, messages: rebuild(source, values), complete: complete(c, translated.complete) })
+  // An app released before this Worker asks for strings it doesn't have yet: answer, but cache nothing.
+  const current = (c.req.query('v') ?? SOURCE_HASH) === SOURCE_HASH
+  return c.json({ lang, hash: SOURCE_HASH, messages: rebuild(source, values), complete: complete(c, translated.complete && current) })
 })
 
 app.get('/v1/quotes/today', reads, async (c) => {
