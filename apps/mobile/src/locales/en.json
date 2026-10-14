@@ -65,8 +65,8 @@
     "privacy": "Privacy policy",
     "about": "About",
     "version": "Version",
-    "madeBy": "Open source, built with Capacitor and shipped with Capgo live updates.",
-    "madeWith": "Made with Capgo",
+    "madeBy": "Open source, built with Capacitor.",
+    "madeWith": "Made by Capgo",
     "howItWorks": "How BeWise works"
   },
   "onboarding": {
