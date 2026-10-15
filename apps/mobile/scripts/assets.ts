@@ -22,4 +22,18 @@ writeFileSync(`${set}/Contents.json`, `${JSON.stringify({
   images: [image('AppIcon-512@2x.png'), image('AppIcon-dark.png', 'dark'), image('AppIcon-tinted.png', 'tinted')],
   info: { author: 'xcode', version: 1 },
 }, null, 2)}\n`)
+
+// Android 12+ system splash icon: 288dp canvas masked to a 192dp circle. The launcher
+// foreground is far too large and small for it, so the wide bw mark gets its own,
+// shrunk to fit the circle (comes with @capacitor/assets).
+const { default: sharp } = await import('sharp')
+for (const [density, scale] of Object.entries({ mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 })) {
+  const canvas = Math.round(288 * scale)
+  const mark = Math.round(canvas * 0.72)
+  const offset = Math.round((canvas - mark) / 2)
+  await sharp({ create: { width: canvas, height: canvas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: await sharp('assets/icon-foreground.png').resize(mark, mark).toBuffer(), left: offset, top: offset }])
+    .png()
+    .toFile(`android/app/src/main/res/drawable-${density}/splash_icon.png`)
+}
 console.log('icons and splash generated')

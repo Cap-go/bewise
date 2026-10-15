@@ -22,6 +22,6 @@
         <item name="android:background">@drawable/splash</item>
         <!-- Android 12+ system splash: glowing bw glyph on the app's ink background -->
         <item name="windowSplashScreenBackground">#0b1016</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
     </style>
 </resources>

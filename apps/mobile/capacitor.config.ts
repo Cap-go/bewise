@@ -20,6 +20,8 @@ const config: CapacitorConfig = {
       launchAutoHide: false,
       backgroundColor: '#0b1016',
       showSpinner: false,
+      // show() calls (Capgo autoSplashscreen) draw drawable/splash: never stretch it.
+      androidScaleType: 'CENTER_CROP',
     },
     LocalNotifications: {
       smallIcon: 'ic_stat_bewise',
