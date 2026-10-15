@@ -1,21 +1,29 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# R8 rules for the release build. Capacitor core ships consumer rules that keep
+# every Plugin subclass and its @PluginMethod methods; the default optimize file
+# keeps @JavascriptInterface bridge methods. These cover the rest.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Readable crash stack traces in Play Console.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Capacitor core finds callbacks by name and annotation, including private ones
+# on the base Plugin class (checkPermissions) that its consumer rules miss.
+-keep class com.getcapacitor.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Capgo updater: its own ProGuard rules are not shipped as consumer rules, and it
+# reaches into the Capacitor bridge and androidx.webkit by reflection.
+-keepattributes *Annotation*, Signature
+-keep class ee.forgr.capacitor_updater.** { *; }
+-keep class com.getcapacitor.Bridge {
+    com.getcapacitor.MessageHandler msgHandler;
+}
+-keep class com.getcapacitor.MessageHandler { *; }
+-keep class com.getcapacitor.PluginCall {
+    <init>(com.getcapacitor.MessageHandler, java.lang.String, java.lang.String, java.lang.String, com.getcapacitor.JSObject);
+}
+-keep class * implements com.getcapacitor.PluginHandle {
+    public void invoke(java.lang.String, com.getcapacitor.PluginCall);
+}
+-keep class androidx.webkit.WebViewFeature { public static *; }
+-keep class androidx.webkit.WebViewCompat { public static *; }
+-dontwarn io.ionic.backgroundrunner.**
