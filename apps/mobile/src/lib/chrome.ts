@@ -40,12 +40,13 @@ function isTabRoot(route: RouteLocationNormalized) {
 }
 
 /**
- * iOS large title: big at the top of a tab page, collapsing into the small
- * centered title once the page scrolls. Pages scroll inside the web view, which
- * the native bar can't observe, so PageShell reports it via setTitleCollapsed().
+ * Large title: big at the top of a tab page, collapsing into the small title
+ * once the page scrolls, on iOS and Android. Pages scroll inside the web view,
+ * which the native bar can't observe, so PageShell reports it via
+ * setTitleCollapsed().
  */
 export function hasLargeTitle(route: RouteLocationNormalized) {
-  return isNative && !isAndroid && route.meta.navbar !== false && isTabRoot(route)
+  return isNative && route.meta.navbar !== false && isTabRoot(route)
 }
 
 let titleCollapsed = false
@@ -99,6 +100,10 @@ async function renderChrome(route: RouteLocationNormalized) {
 export async function setupChrome(router: Router) {
   if (!isNative)
     return
+
+  // Expanded large-title bar height below the status bar: iOS 44pt + 52pt,
+  // Android 56dp toolbar + 52dp title row. style.css keeps content under it.
+  document.documentElement.style.setProperty('--large-title-bar', isAndroid ? '108px' : '96px')
 
   await NativeNavigation.configure({
     contentInsetMode: 'css',

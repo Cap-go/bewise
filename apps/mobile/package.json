@@ -27,7 +27,7 @@
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.4",
     "@capgo/capacitor-in-app-review": "^8.2.5",
-    "@capgo/capacitor-native-navigation": "^8.6.0",
+    "@capgo/capacitor-native-navigation": "^8.10.0",
     "@capgo/capacitor-transitions": "^8.3.2",
     "@capgo/capacitor-updater": "^8.52.1",
     "@capgo/capacitor-widget-kit": "^8.1.12",
