@@ -145,9 +145,9 @@ onUnmounted(() => {
             <svg viewBox="0 0 24 24" class="size-5 shrink-0 text-white/40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
             <input v-model="query" type="search" enterkeyhint="search" :placeholder="t('archive.search')" :aria-label="t('archive.search')" class="min-w-0 flex-1 bg-transparent text-white outline-none placeholder:text-white/35">
           </label>
-          <label v-if="view === 'all'" class="pressable relative grid size-12 shrink-0 place-items-center rounded-2xl bg-ink-2 ring-1 ring-white/5" :class="from ? 'text-sky' : 'text-white/60'" :aria-label="t('archive.jump')">
+          <label v-if="view === 'all'" class="pressable relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-ink-2 ring-1 ring-white/5" :class="from ? 'text-sky' : 'text-white/60'" :aria-label="t('archive.jump')">
             <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
-            <input type="date" :value="from" :max="localDay()" class="absolute inset-0 opacity-0" @change="jump">
+            <input type="date" :value="from" :max="localDay()" class="absolute inset-0 size-full min-w-0 appearance-none opacity-0" @change="jump">
           </label>
         </div>
         <button v-if="from && view === 'all'" class="pressable flex items-center gap-2 rounded-full bg-sky/15 py-1.5 ps-3.5 pe-2.5 text-sm font-semibold text-sky" @click="from = ''">
