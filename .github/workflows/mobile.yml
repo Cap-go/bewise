@@ -54,9 +54,10 @@ jobs:
         id: version
         # major.minor come from package.json, patch is the run number:
         # unique and always increasing for both OTA bundles and store builds.
+        # The +1 skips 3.0.33, uploaded to TestFlight from a local Xcode 27.1 archive.
         run: |
           base=$(jq -r .version apps/mobile/package.json | cut -d. -f1,2)
-          echo "version=$base.$((GITHUB_RUN_NUMBER + 0))" >> "$GITHUB_OUTPUT"
+          echo "version=$base.$((GITHUB_RUN_NUMBER + 1))" >> "$GITHUB_OUTPUT"
       - name: Does this change need a native build?
         id: needed
         working-directory: apps/mobile
@@ -154,7 +155,7 @@ jobs:
           PLAY_CONFIG_JSON: ${{ secrets.PLAY_CONFIG_JSON }}
           # iPhone Duo needs the iOS 27 SDK (older SDKs letterbox the open display), but
           # Capgo Cloud Build only has Xcode 26 machines so far. Set CAPGO_IOS_XCODE_VERSION
-          # to '27.1' here once they exist; 3.0.17 was archived locally with Xcode 27.1.
+          # to '27.1' here once they exist; 3.0.33 (TestFlight) was archived locally with Xcode 27.1.
         run: |
           review=""
           if [ "${{ inputs.submit_for_review || 'true' }}" = "true" ]; then review="--submit-to-store-review"; fi
