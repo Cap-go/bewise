@@ -2,6 +2,12 @@
 //   bun scripts/store-assets.ts
 // Writes store/screenshots/duo-{outer,inner}-{en,fr}/, the widget screenshot of
 // the iPhone and iPad sets, and store/creative/.
+// public/duo/{outer,inner}-*.jpg are captures of the real app on an iPhone Duo
+// simulator (VITE_SCREENSHOTS build): folded on the outer panel, opened with
+// `agent-device fold open` for the inner one, then
+// `xcrun simctl io <udid> screenshot --display=<1|3> --mask=ignored`.
+// Never stand in for them with the web build: it shows the browser tab bar,
+// not the native side rail Duo gets from @capgo/capacitor-native-navigation.
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 

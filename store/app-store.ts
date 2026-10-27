@@ -7,7 +7,8 @@
 // the iPhone app preview with store/previews/iphone.mp4, and places the product
 // page header and search results assets from store/creative/ (Asset Library).
 // Renders come from store/promo (`bun run render`, `bun scripts/store-assets.ts`).
-// `--creative-only` places just the header and search assets, leaving text and screenshots.
+// `--creative-only` places just the header and search assets, leaving text and screenshots;
+// `--screenshots=APP_IPHONE_DUO[,...]` replaces just those screenshot sets.
 import { createHash, createPrivateKey, sign } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -71,6 +72,7 @@ const LOCALES = Object.fromEntries(readdirSync(join(ROOT, 'metadata'))
   .map(locale => [locale, MEDIA_LANG[locale]])) as Record<string, string | undefined>
 const skipMedia = process.argv.includes('--skip-media')
 const creativeOnly = process.argv.includes('--creative-only')
+const onlySets = process.argv.find(a => a.startsWith('--screenshots='))?.split('=')[1].split(',')
 // Screenshot set -> folders (prefix of store/screenshots/<prefix>-<lang>).
 // APP_IPHONE_DUO is not in Apple's OpenAPI yet but the API accepts it; one set
 // holds both the outer (1398x2034) and inner (2007x2853) display screenshots.
@@ -109,10 +111,10 @@ const versionLocs = (await asc(`/v1/appStoreVersions/${appVersion.id}/appStoreVe
 let creative: Record<string, { kind: string, id: string }> | undefined
 
 for (const [locale, lang] of Object.entries(LOCALES)) {
-  if (creativeOnly) {
+  if (creativeOnly || onlySets) {
     const loc = versionLocs.find((l: any) => l.attributes.locale === locale)
     if (lang && loc)
-      await placeCreative(loc.id, locale)
+      await (onlySets ? uploadScreenshots(loc.id, locale, lang, onlySets) : placeCreative(loc.id, locale))
     continue
   }
   const meta = JSON.parse(readFileSync(join(ROOT, 'metadata', `${locale}.json`), 'utf8'))
@@ -147,33 +149,7 @@ for (const [locale, lang] of Object.entries(LOCALES)) {
     continue
 
   // 3. Screenshots: drop every inherited set, upload ours.
-  const sets = (await asc(`/v1/appStoreVersionLocalizations/${loc.id}/appScreenshotSets?limit=50`)).data
-  for (const set of sets)
-    await asc(`/v1/appScreenshotSets/${set.id}`, 'DELETE')
-
-  for (const [displayType, folders] of Object.entries(DISPLAY_TYPES)) {
-    const files = folders.flatMap((folder) => {
-      const dir = join(ROOT, 'screenshots', `${folder}-${lang}`)
-      return existsSync(dir) ? readdirSync(dir).filter(f => /\.(?:png|jpe?g)$/.test(f)).sort().map(f => join(dir, f)) : []
-    })
-    if (!files.length)
-      continue
-    const set = (await asc('/v1/appScreenshotSets', 'POST', {
-      data: { type: 'appScreenshotSets', attributes: { screenshotDisplayType: displayType }, relationships: { appStoreVersionLocalization: { data: { type: 'appStoreVersionLocalizations', id: loc.id } } } },
-    })).data
-    for (const path of files) {
-      const bytes = readFileSync(path)
-      const fileName = path.split('/').slice(-2).join('-')
-      const shot = (await asc('/v1/appScreenshots', 'POST', {
-        data: { type: 'appScreenshots', attributes: { fileName, fileSize: bytes.length }, relationships: { appScreenshotSet: { data: { type: 'appScreenshotSets', id: set.id } } } },
-      })).data
-      await upload(shot.attributes.uploadOperations, bytes, fileName)
-      await asc(`/v1/appScreenshots/${shot.id}`, 'PATCH', {
-        data: { type: 'appScreenshots', id: shot.id, attributes: { uploaded: true, sourceFileChecksum: md5(bytes) } },
-      })
-    }
-    console.log(`${locale}: ${files.length} ${displayType} screenshots`)
-  }
+  await uploadScreenshots(loc.id, locale, lang, Object.keys(DISPLAY_TYPES))
 
   // 4. iPhone app preview (6.9" set, used for every iPhone size). Apple rejects
   // previews that aren't full-screen screen captures (guideline 2.3.4: no device
@@ -197,6 +173,37 @@ for (const [locale, lang] of Object.entries(LOCALES)) {
 
   // 5. Product page header and search results assets (Asset Library, iOS 27+).
   await placeCreative(loc.id, locale)
+}
+
+/** Replace the given screenshot sets of a localization with store/screenshots/<folder>-<lang>. */
+async function uploadScreenshots(locId: string, locale: string, lang: string, types: string[]) {
+  const sets = (await asc(`/v1/appStoreVersionLocalizations/${locId}/appScreenshotSets?limit=50`)).data
+  for (const set of sets.filter((s: any) => types.includes(s.attributes.screenshotDisplayType)))
+    await asc(`/v1/appScreenshotSets/${set.id}`, 'DELETE')
+
+  for (const [displayType, folders] of Object.entries(DISPLAY_TYPES).filter(([t]) => types.includes(t))) {
+    const files = folders.flatMap((folder) => {
+      const dir = join(ROOT, 'screenshots', `${folder}-${lang}`)
+      return existsSync(dir) ? readdirSync(dir).filter(f => /\.(?:png|jpe?g)$/.test(f)).sort().map(f => join(dir, f)) : []
+    })
+    if (!files.length)
+      continue
+    const set = (await asc('/v1/appScreenshotSets', 'POST', {
+      data: { type: 'appScreenshotSets', attributes: { screenshotDisplayType: displayType }, relationships: { appStoreVersionLocalization: { data: { type: 'appStoreVersionLocalizations', id: locId } } } },
+    })).data
+    for (const path of files) {
+      const bytes = readFileSync(path)
+      const fileName = path.split('/').slice(-2).join('-')
+      const shot = (await asc('/v1/appScreenshots', 'POST', {
+        data: { type: 'appScreenshots', attributes: { fileName, fileSize: bytes.length }, relationships: { appScreenshotSet: { data: { type: 'appScreenshotSets', id: set.id } } } },
+      })).data
+      await upload(shot.attributes.uploadOperations, bytes, fileName)
+      await asc(`/v1/appScreenshots/${shot.id}`, 'PATCH', {
+        data: { type: 'appScreenshots', id: shot.id, attributes: { uploaded: true, sourceFileChecksum: md5(bytes) } },
+      })
+    }
+    console.log(`${locale}: ${files.length} ${displayType} screenshots`)
+  }
 }
 
 async function libraryAsset(file: string) {

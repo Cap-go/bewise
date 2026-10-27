@@ -17,8 +17,10 @@ function Device({ src, width, aspect, radius, style }: { src: string, width: num
 }
 
 // ---------------------------------------------------------------------------
-// Framed screenshots. iPhone Duo: outer display 1398x2034, inner 2007x2853;
+// Framed screenshots. iPhone Duo: outer display 1398x2034 (folded, portrait),
+// inner 2853x2007 (open, landscape, as the app runs with the side tab rail);
 // also the 6.9" iPhone (1320x2868) and 13" iPad (2064x2752) sizes.
+// public/duo holds native simulator captures (simctl io screenshot --display).
 
 // A type alias (not an interface) so Remotion accepts it as Record<string, unknown> props.
 export type DuoShotProps = {
@@ -30,7 +32,7 @@ export type DuoShotProps = {
 
 const DUO = {
   outer: { w: 1398, h: 2034 },
-  inner: { w: 2007, h: 2853 },
+  inner: { w: 2853, h: 2007 },
   iphone: { w: 1320, h: 2868 },
   ipad: { w: 2064, h: 2752 },
 }
@@ -49,6 +51,20 @@ export function DuoShot({ display, shot, top, bottom }: DuoShotProps) {
   }[display]
   const screenH = height * layout.screen
   const screenW = screenH * aspect
+  if (display === 'inner') {
+    // Open Duo is landscape: caption on the left, the device on the right.
+    const devW = width * 0.58
+    const devH = devW / aspect
+    return (
+      <AbsoluteFill style={{ fontFamily: sans }}>
+        <Backdrop />
+        <div style={{ position: 'absolute', left: width * 0.05, width: width * 0.26, top: 0, bottom: 0, display: 'flex', alignItems: 'center' }}>
+          <Headline top={top} bottom={bottom} size={width * 0.042} align="left" />
+        </div>
+        <Device src={`duo/${display}-${shot}.jpg`} width={devW} aspect={aspect} radius={devH * 0.06} style={{ left: width * 0.37, top: (height - devH) / 2 - devW * 0.028 }} />
+      </AbsoluteFill>
+    )
+  }
   return (
     <AbsoluteFill style={{ fontFamily: sans }}>
       <Backdrop />
