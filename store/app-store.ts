@@ -7,6 +7,7 @@
 // the iPhone app preview with store/previews/iphone.mp4, and places the product
 // page header and search results assets from store/creative/ (Asset Library).
 // Renders come from store/promo (`bun run render`, `bun scripts/store-assets.ts`).
+// `--creative-only` places just the header and search assets, leaving text and screenshots.
 import { createHash, createPrivateKey, sign } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -69,6 +70,7 @@ const LOCALES = Object.fromEntries(readdirSync(join(ROOT, 'metadata'))
   .sort((a, b) => a === 'en-GB' ? -1 : b === 'en-GB' ? 1 : a.localeCompare(b))
   .map(locale => [locale, MEDIA_LANG[locale]])) as Record<string, string | undefined>
 const skipMedia = process.argv.includes('--skip-media')
+const creativeOnly = process.argv.includes('--creative-only')
 // Screenshot set -> folders (prefix of store/screenshots/<prefix>-<lang>).
 // APP_IPHONE_DUO is not in Apple's OpenAPI yet but the API accepts it; one set
 // holds both the outer (1398x2034) and inner (2007x2853) display screenshots.
@@ -107,6 +109,12 @@ const versionLocs = (await asc(`/v1/appStoreVersions/${appVersion.id}/appStoreVe
 let creative: Record<string, { kind: string, id: string }> | undefined
 
 for (const [locale, lang] of Object.entries(LOCALES)) {
+  if (creativeOnly) {
+    const loc = versionLocs.find((l: any) => l.attributes.locale === locale)
+    if (lang && loc)
+      await placeCreative(loc.id, locale)
+    continue
+  }
   const meta = JSON.parse(readFileSync(join(ROOT, 'metadata', `${locale}.json`), 'utf8'))
 
   const info = infoLocs.find((l: any) => l.attributes.locale === locale)
@@ -194,8 +202,9 @@ for (const [locale, lang] of Object.entries(LOCALES)) {
 async function libraryAsset(file: string) {
   const bytes = readFileSync(join(ROOT, 'creative', file))
   const kind = file.endsWith('.mp4') ? 'appAssetLibraryVideos' : 'appAssetLibraryImages'
-  const referenceName = `BeWise ${file}`
-  // Reuse the copy uploaded by an earlier run instead of filling the library with duplicates.
+  // The checksum in the name makes a re-rendered file a new asset; an unchanged one is
+  // reused instead of filling the library with duplicates.
+  const referenceName = `BeWise ${file} ${md5(bytes).slice(0, 8)}`
   const existing = (await asc(`/v1/appAssetLibraries/${app.id}/${kind === 'appAssetLibraryVideos' ? 'videos' : 'images'}?limit=200`)).data
     .find((a: any) => a.attributes.referenceName === referenceName && !a.attributes.archived)
   if (existing)
@@ -212,9 +221,13 @@ async function placeCreative(locId: string, locale: string) {
   if (!existsSync(join(ROOT, 'creative')))
     return
   creative ??= { header: await libraryAsset('header.mp4'), search: await libraryAsset('search.mp4') }
+  const placed = (await asc(`/v1/appStoreVersionLocalizations/${locId}/placements?limit=200`)).data
   for (const [name, placementType] of [['header', 'PRODUCT_PAGE_HEADER_ASSET'], ['search', 'APP_STORE_SEARCH_RESULTS_ASSET']] as const) {
     const asset = creative[name]
     const media = asset.kind === 'appAssetLibraryVideos' ? 'video' : 'image'
+    // A localization holds one asset per placement: drop the previous render first.
+    for (const old of placed.filter((p: any) => p.attributes.placementType === placementType))
+      await asc(`/v1/appAssetLibraryPlacements/${old.id}`, 'DELETE')
     try {
       await asc('/v1/appAssetLibraryPlacements', 'POST', {
         data: { type: 'appAssetLibraryPlacements', attributes: { placementType }, relationships: { [media]: { data: { type: asset.kind, id: asset.id } }, appStoreVersionLocalization: { data: { type: 'appStoreVersionLocalizations', id: locId } } } },
